@@ -1,0 +1,81 @@
+/**
+ * Domain model for the SAC Biodinâmica help desk.
+ *
+ * These types mirror the planned Postgres schema (see supabase/migrations).
+ * Keeping them framework-agnostic lets the UI, mock data, and the future
+ * Supabase data layer share one source of truth.
+ */
+
+export type UserRole = "admin" | "agent" | "client";
+
+export type TicketStatus =
+  | "new"
+  | "open"
+  | "in_progress"
+  | "waiting_client"
+  | "resolved"
+  | "closed";
+
+export type TicketPriority = "low" | "medium" | "high" | "urgent";
+
+export interface Sector {
+  id: string;
+  name: string;
+  description: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface User {
+  id: string;
+  fullName: string;
+  email: string;
+  role: UserRole;
+  sectorId: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
+/** Requester of a ticket. May or may not have a login account. */
+export interface Client {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  company: string | null;
+  createdAt: string;
+}
+
+export interface TicketMessage {
+  id: string;
+  ticketId: string;
+  authorId: string;
+  authorName: string;
+  body: string;
+  /** When true, the message is an internal note (staff-only). */
+  isInternal: boolean;
+  createdAt: string;
+}
+
+export interface Ticket {
+  id: string;
+  /** Human-facing unique code, e.g. SAC-000123. */
+  code: string;
+  title: string;
+  description: string;
+  requesterId: string;
+  sectorId: string;
+  assigneeId: string | null;
+  status: TicketStatus;
+  priority: TicketPriority;
+  createdAt: string;
+  updatedAt: string;
+  closedAt: string | null;
+}
+
+/** A ticket with its related entities resolved, for list/detail views. */
+export interface TicketWithRelations extends Ticket {
+  requester: Client;
+  sector: Sector;
+  assignee: User | null;
+}
