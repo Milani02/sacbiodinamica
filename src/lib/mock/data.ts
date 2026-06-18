@@ -27,10 +27,10 @@ export const users: User[] = [
 ];
 
 export const clients: Client[] = [
-  { id: "c1", name: "Mariana Reis", email: "mariana@fazendaverde.com", phone: "(11) 98888-1010", company: "Fazenda Verde", createdAt: "2026-04-02T12:00:00Z" },
-  { id: "c2", name: "João Pedro Alves", email: "joao@agrosol.com", phone: "(19) 97777-2020", company: "AgroSol", createdAt: "2026-04-10T12:00:00Z" },
-  { id: "c3", name: "Camila Nunes", email: "camila@hortavida.com", phone: null, company: "Horta Vida", createdAt: "2026-05-01T12:00:00Z" },
-  { id: "c4", name: "Lucas Martins", email: "lucas@terraboa.com", phone: "(31) 96666-3030", company: "Terra Boa", createdAt: "2026-05-18T12:00:00Z" },
+  { id: "c1", name: "Mariana Reis", email: "mariana@fazendaverde.com", phone: "(11) 98888-1010", company: "Fazenda Verde", authUserId: null, createdAt: "2026-04-02T12:00:00Z" },
+  { id: "c2", name: "João Pedro Alves", email: "joao@agrosol.com", phone: "(19) 97777-2020", company: "AgroSol", authUserId: null, createdAt: "2026-04-10T12:00:00Z" },
+  { id: "c3", name: "Camila Nunes", email: "camila@hortavida.com", phone: null, company: "Horta Vida", authUserId: null, createdAt: "2026-05-01T12:00:00Z" },
+  { id: "c4", name: "Lucas Martins", email: "lucas@terraboa.com", phone: "(31) 96666-3030", company: "Terra Boa", authUserId: null, createdAt: "2026-05-18T12:00:00Z" },
 ];
 
 export const tickets: Ticket[] = [

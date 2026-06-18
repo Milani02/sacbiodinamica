@@ -43,6 +43,8 @@ export interface Client {
   email: string;
   phone: string | null;
   company: string | null;
+  /** Linked auth account (when the requester logs in as a client). */
+  authUserId: string | null;
   createdAt: string;
 }
 

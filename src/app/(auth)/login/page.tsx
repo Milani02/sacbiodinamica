@@ -2,30 +2,46 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { BrandMark } from "@/components/layout/brand-mark";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // Fase 1: autenticação real via Supabase. Por ora, entra direto.
+    setError(null);
     setLoading(true);
-    toast.message("Entrando…", {
-      description: "Autenticação real chega na Fase 1.",
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
-    setTimeout(() => router.push("/dashboard"), 600);
+
+    if (error) {
+      setError(
+        error.message === "Invalid login credentials"
+          ? "E-mail ou senha incorretos."
+          : "Não foi possível entrar. Tente novamente.",
+      );
+      setLoading(false);
+      return;
+    }
+
+    // Atualiza os Server Components com a nova sessão.
+    router.replace("/dashboard");
+    router.refresh();
   }
 
   return (
@@ -71,6 +87,13 @@ export default function LoginPage() {
             </p>
           </div>
 
+          {error ? (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTitle>Não foi possível entrar</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
+
           <form onSubmit={handleSubmit}>
             <FieldGroup>
               <Field>
@@ -78,6 +101,8 @@ export default function LoginPage() {
                 <Input
                   id="email"
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="voce@biodinamica.com"
                   autoComplete="email"
                   required
@@ -88,6 +113,8 @@ export default function LoginPage() {
                 <Input
                   id="password"
                   type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   autoComplete="current-password"
                   required

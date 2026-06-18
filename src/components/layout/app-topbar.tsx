@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut, Search, UserRound } from "lucide-react";
 
@@ -22,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { navItems } from "@/components/layout/nav-config";
+import { signOut } from "@/features/auth/actions";
 import { initials } from "@/lib/format";
 import type { User } from "@/types/domain";
 
@@ -73,12 +73,14 @@ export function AppTopbar({ user }: { user: User }) {
                 <UserRound />
                 Meu perfil
               </DropdownMenuItem>
-              <DropdownMenuItem asChild variant="destructive">
-                <Link href="/login">
-                  <LogOut />
-                  Sair
-                </Link>
-              </DropdownMenuItem>
+              <form action={signOut}>
+                <DropdownMenuItem asChild variant="destructive">
+                  <button type="submit" className="w-full">
+                    <LogOut />
+                    Sair
+                  </button>
+                </DropdownMenuItem>
+              </form>
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>

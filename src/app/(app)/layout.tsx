@@ -1,15 +1,18 @@
+import { redirect } from "next/navigation";
+
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { AppTopbar } from "@/components/layout/app-topbar";
-import { currentUser } from "@/lib/mock/data";
+import { getCurrentUser } from "@/features/auth/current-user";
 
-export default function AppLayout({
+export default async function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Fase 0: usuário mockado. Na Fase 1 virá da sessão do Supabase.
-  const user = currentUser;
+  const user = await getCurrentUser();
+  // Guarda extra: o middleware já bloqueia, mas evita renderizar sem sessão.
+  if (!user) redirect("/login");
 
   return (
     <SidebarProvider>
