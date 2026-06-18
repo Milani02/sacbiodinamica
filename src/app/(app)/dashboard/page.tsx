@@ -11,6 +11,7 @@ import {
 import { PageHeader } from "@/components/layout/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { ClientDashboard } from "@/components/dashboard/client-dashboard";
+import { AgentDashboard } from "@/components/dashboard/agent-dashboard";
 import { StatusChart } from "@/components/dashboard/status-chart";
 import { SectorChart } from "@/components/dashboard/sector-chart";
 import { TicketsTable } from "@/components/tickets/tickets-table";
@@ -29,10 +30,14 @@ export default async function DashboardPage() {
   const [tickets, user] = await Promise.all([listTickets(), getCurrentUser()]);
   const isStaff = user ? can.respondTickets(user.role) : false;
 
-  // Clientes têm uma visão própria, focada em abrir e acompanhar chamados.
+  // Cada perfil tem uma visão própria.
   if (user && user.role === "client") {
     return <ClientDashboard user={user} tickets={tickets} />;
   }
+  if (user && user.role === "agent") {
+    return <AgentDashboard user={user} tickets={tickets} />;
+  }
+  // Admin: visão global da central (abaixo).
 
   const openCount = tickets.filter((t) =>
     ACTIVE_STATUSES.includes(t.status),
