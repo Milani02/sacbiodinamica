@@ -14,5 +14,6 @@ Variáveis de ambiente em `.env.local` (ver `.env.example`):
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY` (somente servidor)
 
-Enquanto a Fase 1 não chega, a aplicação roda sobre dados mockados em
-`src/lib/mock/`.
+A aplicação lê e escreve no Supabase através de:
+- `src/features/*/queries.ts` — leituras (Server Components).
+- `src/features/tickets/actions.ts` — escritas (Server Actions).

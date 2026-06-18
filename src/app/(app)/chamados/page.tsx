@@ -5,11 +5,13 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { TicketsList } from "@/components/tickets/tickets-list";
-import { sectors, ticketsWithRelations } from "@/lib/mock/data";
+import { listTickets } from "@/features/tickets/queries";
+import { listSectors } from "@/features/sectors/queries";
 
 export const metadata: Metadata = { title: "Chamados" };
 
-export default function ChamadosPage() {
+export default async function ChamadosPage() {
+  const [tickets, sectors] = await Promise.all([listTickets(), listSectors()]);
   return (
     <>
       <PageHeader
@@ -24,7 +26,7 @@ export default function ChamadosPage() {
           </Button>
         }
       />
-      <TicketsList tickets={ticketsWithRelations} sectors={sectors} />
+      <TicketsList tickets={tickets} sectors={sectors} />
     </>
   );
 }

@@ -12,11 +12,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/layout/page-header";
-import { sectors, ticketsWithRelations } from "@/lib/mock/data";
+import { listSectors } from "@/features/sectors/queries";
+import { listTickets } from "@/features/tickets/queries";
 
 export const metadata: Metadata = { title: "Setores" };
 
-export default function SetoresPage() {
+export default async function SetoresPage() {
+  const [sectors, tickets] = await Promise.all([listSectors(), listTickets()]);
   return (
     <>
       <PageHeader
@@ -41,7 +43,7 @@ export default function SetoresPage() {
           </TableHeader>
           <TableBody>
             {sectors.map((sector) => {
-              const count = ticketsWithRelations.filter(
+              const count = tickets.filter(
                 (t) => t.sectorId === sector.id,
               ).length;
               return (

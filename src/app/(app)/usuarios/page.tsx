@@ -14,14 +14,15 @@ import {
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/layout/page-header";
 import { USER_ROLE } from "@/features/auth/roles";
-import { sectors, users } from "@/lib/mock/data";
+import { listUsers } from "@/features/users/queries";
+import { listSectors } from "@/features/sectors/queries";
 import { initials } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Usuários" };
 
-const sectorName = new Map(sectors.map((s) => [s.id, s.name]));
-
-export default function UsuariosPage() {
+export default async function UsuariosPage() {
+  const [users, sectors] = await Promise.all([listUsers(), listSectors()]);
+  const sectorName = new Map(sectors.map((s) => [s.id, s.name]));
   return (
     <>
       <PageHeader

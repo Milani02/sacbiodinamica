@@ -260,3 +260,17 @@ create policy "messages_insert" on public.ticket_messages
     and public.can_access_ticket(ticket_id)
     and (is_internal = false or public.is_staff())
   );
+
+-- ============================================================
+-- Grants — o RLS só é avaliado APÓS o privilégio de tabela.
+-- Concedemos ao papel `authenticated`; o `anon` fica sem acesso
+-- (o app sempre opera com sessão autenticada). O RLS filtra as linhas.
+-- ============================================================
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on all tables in schema public to authenticated;
+grant usage, select on all sequences in schema public to authenticated;
+
+alter default privileges in schema public
+  grant select, insert, update, delete on tables to authenticated;
+alter default privileges in schema public
+  grant usage, select on sequences to authenticated;

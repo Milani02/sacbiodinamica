@@ -11,12 +11,12 @@ import {
 import { PageHeader } from "@/components/layout/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { TicketsTable } from "@/components/tickets/tickets-table";
-import { ticketsWithRelations } from "@/lib/mock/data";
+import { listTickets } from "@/features/tickets/queries";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
-export default function DashboardPage() {
-  const tickets = ticketsWithRelations;
+export default async function DashboardPage() {
+  const tickets = await listTickets();
 
   const openCount = tickets.filter((t) =>
     ["new", "open", "in_progress", "waiting_client"].includes(t.status),

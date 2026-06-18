@@ -12,12 +12,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/layout/page-header";
-import { clients, ticketsWithRelations } from "@/lib/mock/data";
+import { listClients } from "@/features/clients/queries";
+import { listTickets } from "@/features/tickets/queries";
 import { initials } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Clientes" };
 
-export default function ClientesPage() {
+export default async function ClientesPage() {
+  const [clients, tickets] = await Promise.all([listClients(), listTickets()]);
   return (
     <>
       <PageHeader
@@ -42,7 +44,7 @@ export default function ClientesPage() {
           </TableHeader>
           <TableBody>
             {clients.map((client) => {
-              const count = ticketsWithRelations.filter(
+              const count = tickets.filter(
                 (t) => t.requesterId === client.id,
               ).length;
               return (

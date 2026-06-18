@@ -34,6 +34,11 @@ yarn-error.log*
 .env*
 !.env.example
 
+# local dev scratch
+.dev.log
+.shots/
+.shots.py
+
 # vercel
 .vercel
 

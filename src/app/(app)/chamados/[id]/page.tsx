@@ -1,33 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { ArrowLeft, Lock, Send } from "lucide-react";
+import { notFound, redirect } from "next/navigation";
+import { ArrowLeft, Lock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupTextarea,
-} from "@/components/ui/input-group";
 import { StatusBadge } from "@/components/tickets/status-badge";
 import { PriorityBadge } from "@/components/tickets/priority-badge";
-import { can } from "@/features/auth/roles";
 import {
-  currentUser,
-  messages as allMessages,
-  tickets,
-  withRelations,
-} from "@/lib/mock/data";
+  AssigneeSelect,
+  PrioritySelect,
+  StatusSelect,
+} from "@/components/tickets/ticket-controls";
+import { MessageComposer } from "@/components/tickets/message-composer";
+import { can } from "@/features/auth/roles";
+import { getCurrentUser } from "@/features/auth/current-user";
+import {
+  getTicket,
+  getTicketMessages,
+} from "@/features/tickets/queries";
+import { listAgents } from "@/features/users/queries";
 import { formatDateTime, formatRelative, initials } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { TicketMessage } from "@/types/domain";
@@ -35,7 +30,6 @@ import type { TicketMessage } from "@/types/domain";
 export const metadata: Metadata = { title: "Chamado" };
 
 function MessageBubble({ message }: { message: TicketMessage }) {
-  const isStaff = message.authorId.startsWith("u");
   return (
     <div className="flex gap-3">
       <Avatar className="size-8">
@@ -44,9 +38,7 @@ function MessageBubble({ message }: { message: TicketMessage }) {
             "text-xs",
             message.isInternal
               ? "bg-warning/15 text-warning"
-              : isStaff
-                ? "bg-primary/10 text-primary"
-                : "bg-muted",
+              : "bg-primary/10 text-primary",
           )}
         >
           {initials(message.authorName)}
@@ -61,10 +53,8 @@ function MessageBubble({ message }: { message: TicketMessage }) {
         </div>
         <div
           className={cn(
-            "mt-1 rounded-lg border px-3 py-2 text-sm",
-            message.isInternal
-              ? "border-warning/30 bg-warning/5"
-              : "bg-card",
+            "mt-1 rounded-lg border px-3 py-2 text-sm whitespace-pre-wrap",
+            message.isInternal ? "border-warning/30 bg-warning/5" : "bg-card",
           )}
         >
           {message.body}
@@ -80,17 +70,20 @@ export default async function ChamadoDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const base = tickets.find((t) => t.id === id);
-  if (!base) notFound();
 
-  const ticket = withRelations(base);
-  const threadMessages = allMessages.filter(
-    (m) => m.ticketId === ticket.id && !m.isInternal,
-  );
-  const internalNotes = allMessages.filter(
-    (m) => m.ticketId === ticket.id && m.isInternal,
-  );
-  const showInternal = can.seeInternalNotes(currentUser.role);
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const ticket = await getTicket(id);
+  if (!ticket) notFound();
+
+  const messages = await getTicketMessages(id);
+  const isStaff = can.respondTickets(user.role);
+  const showInternal = can.seeInternalNotes(user.role);
+  const agents = isStaff ? await listAgents() : [];
+
+  const thread = messages.filter((m) => !m.isInternal);
+  const internalNotes = messages.filter((m) => m.isInternal);
 
   return (
     <>
@@ -121,7 +114,7 @@ export default async function ChamadoDetailPage({
               <CardTitle>Descrição</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm leading-relaxed text-muted-foreground">
+              <p className="text-sm leading-relaxed whitespace-pre-wrap text-muted-foreground">
                 {ticket.description}
               </p>
             </CardContent>
@@ -129,35 +122,35 @@ export default async function ChamadoDetailPage({
 
           <Tabs defaultValue="conversa">
             <TabsList>
-              <TabsTrigger value="conversa">Conversa</TabsTrigger>
+              <TabsTrigger value="conversa">
+                Conversa
+                {thread.length > 0 ? (
+                  <span className="text-muted-foreground">({thread.length})</span>
+                ) : null}
+              </TabsTrigger>
               {showInternal ? (
                 <TabsTrigger value="notas">
                   <Lock data-icon="inline-start" />
                   Notas internas
+                  {internalNotes.length > 0 ? (
+                    <span className="text-muted-foreground">
+                      ({internalNotes.length})
+                    </span>
+                  ) : null}
                 </TabsTrigger>
               ) : null}
             </TabsList>
 
             <TabsContent value="conversa" className="flex flex-col gap-4">
-              {threadMessages.map((m) => (
-                <MessageBubble key={m.id} message={m} />
-              ))}
+              {thread.length > 0 ? (
+                thread.map((m) => <MessageBubble key={m.id} message={m} />)
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Nenhuma mensagem ainda. Comece a conversa abaixo.
+                </p>
+              )}
               <Separator />
-              <InputGroup>
-                <InputGroupTextarea
-                  placeholder="Escreva uma resposta ao solicitante..."
-                  disabled
-                />
-                <InputGroupAddon align="block-end">
-                  <InputGroupButton className="ml-auto" disabled>
-                    <Send data-icon="inline-start" />
-                    Responder
-                  </InputGroupButton>
-                </InputGroupAddon>
-              </InputGroup>
-              <p className="text-xs text-muted-foreground">
-                O envio de mensagens será ativado na Fase 2.
-              </p>
+              <MessageComposer ticketId={ticket.id} />
             </TabsContent>
 
             {showInternal ? (
@@ -171,6 +164,8 @@ export default async function ChamadoDetailPage({
                     Nenhuma nota interna ainda.
                   </p>
                 )}
+                <Separator />
+                <MessageComposer ticketId={ticket.id} isInternal />
               </TabsContent>
             ) : null}
           </Tabs>
@@ -181,6 +176,25 @@ export default async function ChamadoDetailPage({
             <CardTitle>Detalhes</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 text-sm">
+            {isStaff ? (
+              <>
+                <Detail label="Status">
+                  <StatusSelect ticketId={ticket.id} value={ticket.status} />
+                </Detail>
+                <Detail label="Prioridade">
+                  <PrioritySelect ticketId={ticket.id} value={ticket.priority} />
+                </Detail>
+                <Detail label="Responsável">
+                  <AssigneeSelect
+                    ticketId={ticket.id}
+                    value={ticket.assigneeId}
+                    agents={agents}
+                  />
+                </Detail>
+                <Separator />
+              </>
+            ) : null}
+
             <Detail label="Solicitante">
               <div className="grid">
                 <span className="font-medium">{ticket.requester.name}</span>
@@ -191,22 +205,16 @@ export default async function ChamadoDetailPage({
                 ) : null}
               </div>
             </Detail>
-            <Separator />
             <Detail label="Setor responsável">{ticket.sector.name}</Detail>
-            <Detail label="Responsável">
-              {ticket.assignee ? (
-                <div className="flex items-center gap-2">
-                  <Avatar className="size-6">
-                    <AvatarFallback className="bg-muted text-[10px]">
-                      {initials(ticket.assignee.fullName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span>{ticket.assignee.fullName}</span>
-                </div>
-              ) : (
-                <span className="text-muted-foreground">Não atribuído</span>
-              )}
-            </Detail>
+            {!isStaff ? (
+              <Detail label="Responsável">
+                {ticket.assignee ? (
+                  ticket.assignee.fullName
+                ) : (
+                  <span className="text-muted-foreground">Não atribuído</span>
+                )}
+              </Detail>
+            ) : null}
             <Separator />
             <Detail label="Aberto em">{formatDateTime(ticket.createdAt)}</Detail>
             <Detail label="Atualizado em">
@@ -227,7 +235,7 @@ function Detail({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid gap-1">
+    <div className="grid gap-1.5">
       <span className="text-xs text-muted-foreground">{label}</span>
       <div>{children}</div>
     </div>
