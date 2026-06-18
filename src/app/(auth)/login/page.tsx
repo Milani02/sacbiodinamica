@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +11,6 @@ import { BrandMark } from "@/components/layout/brand-mark";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,9 +37,9 @@ export default function LoginPage() {
       return;
     }
 
-    // Atualiza os Server Components com a nova sessão.
-    router.replace("/dashboard");
-    router.refresh();
+    // Navegação de página inteira: garante que o cookie de sessão recém-criado
+    // seja enviado ao servidor, evitando a corrida que prendia o usuário no login.
+    window.location.assign("/dashboard");
   }
 
   return (
