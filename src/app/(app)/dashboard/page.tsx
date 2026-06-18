@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
+import { ClientDashboard } from "@/components/dashboard/client-dashboard";
 import { StatusChart } from "@/components/dashboard/status-chart";
 import { SectorChart } from "@/components/dashboard/sector-chart";
 import { TicketsTable } from "@/components/tickets/tickets-table";
@@ -27,6 +28,11 @@ export const metadata: Metadata = { title: "Dashboard" };
 export default async function DashboardPage() {
   const [tickets, user] = await Promise.all([listTickets(), getCurrentUser()]);
   const isStaff = user ? can.respondTickets(user.role) : false;
+
+  // Clientes têm uma visão própria, focada em abrir e acompanhar chamados.
+  if (user && user.role === "client") {
+    return <ClientDashboard user={user} tickets={tickets} />;
+  }
 
   const openCount = tickets.filter((t) =>
     ACTIVE_STATUSES.includes(t.status),

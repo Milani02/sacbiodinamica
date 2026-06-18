@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,6 +125,16 @@ export default function LoginPage() {
               </Button>
             </FieldGroup>
           </form>
+
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            É cliente e ainda não tem conta?{" "}
+            <Link
+              href="/registro"
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
+              Cadastre-se
+            </Link>
+          </p>
         </div>
       </div>
     </div>

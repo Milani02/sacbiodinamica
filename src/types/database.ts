@@ -129,7 +129,12 @@ export interface Database {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      ensure_my_client: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
+    };
     Enums: {
       user_role: UserRole;
       ticket_status: TicketStatus;

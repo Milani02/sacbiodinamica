@@ -4,7 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 import type { Database } from "@/types/database";
 
 /** Public routes that don't require an authenticated session. */
-const PUBLIC_PATHS = ["/login", "/auth"];
+const PUBLIC_PATHS = ["/login", "/registro", "/auth"];
 
 function isPublic(pathname: string) {
   return PUBLIC_PATHS.some(

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/features/auth/current-user";
 import type { TicketPriority, TicketStatus } from "@/types/domain";
 
 export interface ActionResult {
@@ -38,19 +39,35 @@ export async function createTicket(input: {
   const description = input.description.trim();
   if (!title) return { ok: false, error: "Informe um título." };
   if (!description) return { ok: false, error: "Descreva o chamado." };
-  if (!input.requesterId) return { ok: false, error: "Selecione o solicitante." };
   if (!input.sectorId) return { ok: false, error: "Selecione o setor." };
   if (!PRIORITIES.includes(input.priority)) {
     return { ok: false, error: "Prioridade inválida." };
   }
 
+  const me = await getCurrentUser();
+  if (!me) return { ok: false, error: "Sessão expirada. Entre novamente." };
+
   const supabase = await createClient();
+
+  // Cliente abre chamado em seu próprio nome (resolve/cria o registro de
+  // solicitante). Staff escolhe o solicitante na lista.
+  let requesterId = input.requesterId;
+  if (me.role === "client") {
+    const { data: cid, error: rpcError } = await supabase.rpc("ensure_my_client");
+    if (rpcError || !cid) {
+      return { ok: false, error: "Não foi possível identificar seu cadastro." };
+    }
+    requesterId = cid;
+  } else if (!requesterId) {
+    return { ok: false, error: "Selecione o solicitante." };
+  }
+
   const { data, error } = await supabase
     .from("tickets")
     .insert({
       title,
       description,
-      requester_id: input.requesterId,
+      requester_id: requesterId,
       sector_id: input.sectorId,
       priority: input.priority,
     })

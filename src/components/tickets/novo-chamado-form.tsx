@@ -35,9 +35,11 @@ import type { Client, Sector, TicketPriority } from "@/types/domain";
 export function NovoChamadoForm({
   clients,
   sectors,
+  isClient = false,
 }: {
   clients: Client[];
   sectors: Sector[];
+  isClient?: boolean;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -51,7 +53,7 @@ export function NovoChamadoForm({
   const errors = {
     title: !title.trim() ? "Informe um título." : null,
     description: !description.trim() ? "Descreva o chamado." : null,
-    requester: !requester ? "Selecione o solicitante." : null,
+    requester: !isClient && !requester ? "Selecione o solicitante." : null,
     sector: !sector ? "Selecione o setor." : null,
   };
   const isValid = Object.values(errors).every((e) => e === null);
@@ -111,28 +113,36 @@ export function NovoChamadoForm({
               ) : null}
             </Field>
 
-            <div className="grid gap-6 sm:grid-cols-2">
-              <Field data-invalid={submitted && !!errors.requester}>
-                <FieldLabel>Solicitante</FieldLabel>
-                <Select value={requester} onValueChange={setRequester}>
-                  <SelectTrigger aria-invalid={submitted && !!errors.requester}>
-                    <SelectValue placeholder="Selecione o cliente" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {clients.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.name}
-                          {c.company ? ` · ${c.company}` : ""}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                {submitted && errors.requester ? (
-                  <FieldError>{errors.requester}</FieldError>
-                ) : null}
-              </Field>
+            <div
+              className={
+                isClient ? "grid gap-6" : "grid gap-6 sm:grid-cols-2"
+              }
+            >
+              {!isClient ? (
+                <Field data-invalid={submitted && !!errors.requester}>
+                  <FieldLabel>Solicitante</FieldLabel>
+                  <Select value={requester} onValueChange={setRequester}>
+                    <SelectTrigger
+                      aria-invalid={submitted && !!errors.requester}
+                    >
+                      <SelectValue placeholder="Selecione o cliente" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {clients.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.name}
+                            {c.company ? ` · ${c.company}` : ""}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  {submitted && errors.requester ? (
+                    <FieldError>{errors.requester}</FieldError>
+                  ) : null}
+                </Field>
+              ) : null}
 
               <Field data-invalid={submitted && !!errors.sector}>
                 <FieldLabel>Setor responsável</FieldLabel>
