@@ -1,71 +1,39 @@
 import type { Metadata } from "next";
-import { Plus } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { PageHeader } from "@/components/layout/page-header";
+import { SectorsManager } from "@/components/sectors/sectors-manager";
 import { listSectors } from "@/features/sectors/queries";
 import { listTickets } from "@/features/tickets/queries";
+import { getCurrentUser } from "@/features/auth/current-user";
+import { can } from "@/features/auth/roles";
 
 export const metadata: Metadata = { title: "Setores" };
 
 export default async function SetoresPage() {
-  const [sectors, tickets] = await Promise.all([listSectors(), listTickets()]);
+  const [sectors, tickets, user] = await Promise.all([
+    listSectors(),
+    listTickets(),
+    getCurrentUser(),
+  ]);
+
+  const counts: Record<string, number> = {};
+  for (const t of tickets) {
+    counts[t.sectorId] = (counts[t.sectorId] ?? 0) + 1;
+  }
+
+  const canManage = user ? can.manageSectors(user.role) : false;
+
   return (
     <>
       <PageHeader
         title="Setores"
         description="Áreas responsáveis pelo atendimento dos chamados."
-        actions={
-          <Button disabled>
-            <Plus data-icon="inline-start" />
-            Novo setor
-          </Button>
-        }
       />
-      <div className="overflow-hidden rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead>Setor</TableHead>
-              <TableHead className="hidden sm:table-cell">Descrição</TableHead>
-              <TableHead className="text-right">Chamados</TableHead>
-              <TableHead className="text-right">Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sectors.map((sector) => {
-              const count = tickets.filter(
-                (t) => t.sectorId === sector.id,
-              ).length;
-              return (
-                <TableRow key={sector.id}>
-                  <TableCell className="font-medium">{sector.name}</TableCell>
-                  <TableCell className="hidden text-sm text-muted-foreground sm:table-cell">
-                    {sector.description ?? "—"}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {count}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Badge variant={sector.isActive ? "secondary" : "outline"}>
-                      {sector.isActive ? "Ativo" : "Inativo"}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </div>
+      <SectorsManager
+        sectors={sectors}
+        counts={counts}
+        canManage={canManage}
+      />
     </>
   );
 }
