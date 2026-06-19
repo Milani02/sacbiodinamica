@@ -52,7 +52,7 @@ export function NovoChamadoForm({
 
   const errors = {
     title: !title.trim() ? "Informe um título." : null,
-    description: !description.trim() ? "Descreva o chamado." : null,
+    description: !description.trim() ? "Descreva o ticket." : null,
     requester: !isClient && !requester ? "Selecione o solicitante." : null,
     sector: !sector ? "Selecione o setor." : null,
   };
@@ -71,10 +71,10 @@ export function NovoChamadoForm({
         priority,
       });
       if (res.ok && res.id) {
-        toast.success("Chamado aberto");
+        toast.success("Ticket aberto");
         router.push(`/chamados/${res.id}`);
       } else {
-        toast.error(res.error ?? "Não foi possível abrir o chamado.");
+        toast.error(res.error ?? "Não foi possível abrir o ticket.");
       }
     });
   }
@@ -196,7 +196,7 @@ export function NovoChamadoForm({
               </Button>
               <Button type="submit" disabled={pending}>
                 {pending ? <Spinner data-icon="inline-start" /> : null}
-                Abrir chamado
+                Abrir ticket
               </Button>
             </div>
           </FieldGroup>

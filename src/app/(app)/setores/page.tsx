@@ -27,7 +27,7 @@ export default async function SetoresPage() {
     <>
       <PageHeader
         title="Setores"
-        description="Áreas responsáveis pelo atendimento dos chamados."
+        description="Áreas responsáveis pelo atendimento dos tickets."
       />
       <SectorsManager
         sectors={sectors}

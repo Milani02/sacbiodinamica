@@ -45,9 +45,9 @@ export function TicketsTable({
           <EmptyMedia variant="icon">
             <Inbox />
           </EmptyMedia>
-          <EmptyTitle>Nenhum chamado por aqui</EmptyTitle>
+          <EmptyTitle>Nenhum ticket por aqui</EmptyTitle>
           <EmptyDescription>
-            {emptyHint ?? "Quando houver chamados, eles aparecerão nesta lista."}
+            {emptyHint ?? "Quando houver tickets, eles aparecerão nesta lista."}
           </EmptyDescription>
         </EmptyHeader>
       </Empty>

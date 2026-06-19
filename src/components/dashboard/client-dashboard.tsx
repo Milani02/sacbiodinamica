@@ -33,12 +33,12 @@ export function ClientDashboard({
     <>
       <PageHeader
         title={`Olá, ${firstName}`}
-        description="Abra chamados e acompanhe suas solicitações."
+        description="Visualize seus tickets"
         actions={
           <Button asChild>
             <Link href="/chamados/novo">
               <Plus data-icon="inline-start" />
-              Abrir chamado
+              Abrir ticket
             </Link>
           </Button>
         }
@@ -70,15 +70,15 @@ export function ClientDashboard({
 
       <Card>
         <CardHeader>
-          <CardTitle>Meus chamados</CardTitle>
+          <CardTitle>Meus tickets</CardTitle>
           <CardDescription>
-            Acompanhe o andamento e converse com a equipe em cada chamado.
+            Acompanhe o andamento e converse com a equipe em cada ticket.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <TicketsTable
             tickets={tickets}
-            emptyHint="Você ainda não abriu chamados. Clique em “Abrir chamado”."
+            emptyHint="Você ainda não abriu tickets. Clique em “Abrir ticket”."
           />
         </CardContent>
       </Card>

@@ -144,7 +144,7 @@ export function SectorsManager({
             <TableRow className="hover:bg-transparent">
               <TableHead>Setor</TableHead>
               <TableHead className="hidden sm:table-cell">Descrição</TableHead>
-              <TableHead className="text-right">Chamados</TableHead>
+              <TableHead className="text-right">Tickets</TableHead>
               <TableHead className="text-right">Status</TableHead>
               {canManage ? <TableHead className="w-12" /> : null}
             </TableRow>
@@ -203,7 +203,7 @@ export function SectorsManager({
             <DialogHeader>
               <DialogTitle>{editing ? "Editar setor" : "Novo setor"}</DialogTitle>
               <DialogDescription>
-                Setores agrupam os chamados por área responsável.
+                Setores agrupam os tickets por área responsável.
               </DialogDescription>
             </DialogHeader>
             <FieldGroup className="py-4">
@@ -236,7 +236,7 @@ export function SectorsManager({
                   />
                   <FieldLabel htmlFor="sector-active">Setor ativo</FieldLabel>
                   <FieldDescription>
-                    Inativos não recebem novos chamados.
+                    Inativos não recebem novos tickets.
                   </FieldDescription>
                 </Field>
               ) : null}

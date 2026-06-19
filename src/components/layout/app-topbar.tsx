@@ -47,7 +47,7 @@ export function AppTopbar({ user }: { user: User }) {
           <InputGroupAddon>
             <Search />
           </InputGroupAddon>
-          <InputGroupInput placeholder="Buscar chamados..." />
+          <InputGroupInput placeholder="Buscar tickets" />
         </InputGroup>
 
         <DropdownMenu>

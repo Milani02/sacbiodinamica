@@ -12,11 +12,11 @@ export const USER_ROLE: Record<UserRole, RoleMeta> = {
   },
   agent: {
     label: "Atendente",
-    description: "Acessa e responde chamados.",
+    description: "Acessa e responde tickets.",
   },
   client: {
     label: "Cliente",
-    description: "Abre e acompanha os próprios chamados.",
+    description: "Abre e acompanha os próprios tickets.",
   },
 };
 

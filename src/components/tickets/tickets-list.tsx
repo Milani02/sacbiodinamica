@@ -140,7 +140,7 @@ export function TicketsList({
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           {filtered.length}{" "}
-          {filtered.length === 1 ? "chamado" : "chamados"}
+          {filtered.length === 1 ? "ticket" : "tickets"}
           {hasFilters ? " (filtrados)" : ""}
         </p>
       </div>
@@ -149,7 +149,7 @@ export function TicketsList({
         tickets={filtered}
         emptyHint={
           hasFilters
-            ? "Nenhum chamado corresponde aos filtros. Ajuste a busca."
+            ? "Nenhum ticket corresponde aos filtros. Ajuste a busca."
             : undefined
         }
       />

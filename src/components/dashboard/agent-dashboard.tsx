@@ -59,7 +59,7 @@ export function AgentDashboard({
         description="Sua fila de atendimento e o que precisa de ação."
         actions={
           <Button asChild>
-            <Link href="/chamados/novo">Novo chamado</Link>
+            <Link href="/chamados/novo">Novo ticket</Link>
           </Button>
         }
       />
@@ -68,7 +68,7 @@ export function AgentDashboard({
         <StatCard
           label="Atribuídos a mim"
           value={mineActive.length}
-          hint="Chamados ativos sob sua responsabilidade"
+          hint="Tickets ativos sob sua responsabilidade"
           icon={Inbox}
           accent="text-status-progress"
         />
@@ -98,22 +98,22 @@ export function AgentDashboard({
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_320px]">
         <Card>
           <CardHeader>
-            <CardTitle>Meus chamados em aberto</CardTitle>
+            <CardTitle>Meus tickets em aberto</CardTitle>
             <CardDescription>
-              Chamados ativos atribuídos a você.
+              Tickets ativos atribuídos a você.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <TicketsTable
               tickets={mineActive}
-              emptyHint="Nenhum chamado atribuído a você no momento."
+              emptyHint="Nenhum ticket atribuído a você no momento."
             />
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Meus chamados por status</CardTitle>
+            <CardTitle>Meus tickets por status</CardTitle>
             <CardDescription>Distribuição da sua carteira.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -127,14 +127,14 @@ export function AgentDashboard({
           <CardTitle>Fila do meu setor</CardTitle>
           <CardDescription>
             {user.sectorId
-              ? "Chamados do seu setor ainda sem responsável."
+              ? "Tickets do seu setor ainda sem responsável."
               : "Você não está vinculado a um setor. Peça a um administrador para definir o seu setor."}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <TicketsTable
             tickets={myQueue}
-            emptyHint="Nenhum chamado aguardando na fila do seu setor."
+            emptyHint="Nenhum ticket aguardando na fila do seu setor."
           />
         </CardContent>
       </Card>

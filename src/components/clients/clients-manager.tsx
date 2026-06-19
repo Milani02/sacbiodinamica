@@ -140,7 +140,7 @@ export function ClientsManager({
               <TableHead>Cliente</TableHead>
               <TableHead className="hidden md:table-cell">Empresa</TableHead>
               <TableHead className="hidden lg:table-cell">Telefone</TableHead>
-              <TableHead className="text-right">Chamados</TableHead>
+              <TableHead className="text-right">Tickets</TableHead>
               {canManage ? <TableHead className="w-12" /> : null}
             </TableRow>
           </TableHeader>
@@ -213,7 +213,7 @@ export function ClientsManager({
                 {editing ? "Editar cliente" : "Novo cliente"}
               </DialogTitle>
               <DialogDescription>
-                Solicitantes que abrem chamados na central.
+                Solicitantes que abrem tickets na central.
               </DialogDescription>
             </DialogHeader>
             <FieldGroup className="py-4">

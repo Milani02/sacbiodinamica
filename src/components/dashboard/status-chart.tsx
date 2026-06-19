@@ -16,7 +16,7 @@ export interface StatusDatum {
   color: string;
 }
 
-const config: ChartConfig = { count: { label: "Chamados" } };
+const config: ChartConfig = { count: { label: "Tickets" } };
 
 export function StatusChart({ data }: { data: StatusDatum[] }) {
   const total = data.reduce((sum, d) => sum + d.count, 0);
@@ -25,7 +25,7 @@ export function StatusChart({ data }: { data: StatusDatum[] }) {
   if (total === 0) {
     return (
       <div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">
-        Sem chamados para exibir.
+        Sem tickets para exibir.
       </div>
     );
   }
@@ -70,7 +70,7 @@ export function StatusChart({ data }: { data: StatusDatum[] }) {
                         y={(viewBox.cy ?? 0) + 20}
                         className="fill-muted-foreground text-xs"
                       >
-                        chamados
+                        tickets
                       </tspan>
                     </text>
                   );

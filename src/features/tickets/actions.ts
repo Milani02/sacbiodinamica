@@ -38,7 +38,7 @@ export async function createTicket(input: {
   const title = input.title.trim();
   const description = input.description.trim();
   if (!title) return { ok: false, error: "Informe um título." };
-  if (!description) return { ok: false, error: "Descreva o chamado." };
+  if (!description) return { ok: false, error: "Descreva o ticket." };
   if (!input.sectorId) return { ok: false, error: "Selecione o setor." };
   if (!PRIORITIES.includes(input.priority)) {
     return { ok: false, error: "Prioridade inválida." };
@@ -74,7 +74,7 @@ export async function createTicket(input: {
     .select("id")
     .single();
 
-  if (error) return { ok: false, error: "Não foi possível abrir o chamado." };
+  if (error) return { ok: false, error: "Não foi possível abrir o ticket." };
 
   revalidateTicket(data.id);
   return { ok: true, id: data.id };

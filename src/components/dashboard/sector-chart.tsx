@@ -15,7 +15,7 @@ export interface SectorDatum {
 }
 
 const config: ChartConfig = {
-  count: { label: "Chamados", color: "var(--primary)" },
+  count: { label: "Tickets", color: "var(--primary)" },
 };
 
 export function SectorChart({ data }: { data: SectorDatum[] }) {
@@ -24,7 +24,7 @@ export function SectorChart({ data }: { data: SectorDatum[] }) {
   if (total === 0) {
     return (
       <div className="flex h-[220px] items-center justify-center text-sm text-muted-foreground">
-        Sem chamados para exibir.
+        Sem tickets para exibir.
       </div>
     );
   }

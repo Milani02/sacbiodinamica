@@ -68,7 +68,7 @@ export default function RegistroPage() {
         </div>
         <div className="max-w-sm">
           <p className="text-2xl font-medium leading-snug tracking-tight">
-            Abra um chamado em minutos.
+            Abra um ticket em minutos.
           </p>
           <p className="mt-3 text-sm text-sidebar-foreground/70">
             Crie sua conta para registrar solicitações e conversar com a nossa
@@ -110,7 +110,7 @@ export default function RegistroPage() {
                   Criar conta
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                  Registre-se como cliente para abrir e acompanhar chamados.
+                  Registre-se como cliente para abrir e acompanhar tickets.
                 </p>
               </div>
 

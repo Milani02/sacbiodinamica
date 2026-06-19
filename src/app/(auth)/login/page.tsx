@@ -58,7 +58,7 @@ export default function LoginPage() {
             Atendimento que cresce com cuidado.
           </p>
           <p className="mt-3 text-sm text-sidebar-foreground/70">
-            Centralize chamados, organize a equipe e acompanhe cada solicitação
+            Centralize tickets, organize a equipe e acompanhe cada solicitação
             do início ao fim.
           </p>
         </div>

@@ -28,7 +28,7 @@ export default async function ClientesPage() {
     <>
       <PageHeader
         title="Clientes"
-        description="Solicitantes que abrem chamados na central."
+        description="Solicitantes que abrem tickets na central."
       />
       <ClientsManager
         clients={clients}

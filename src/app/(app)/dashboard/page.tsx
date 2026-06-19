@@ -24,7 +24,7 @@ import {
   TICKET_STATUS_ORDER,
 } from "@/features/tickets/constants";
 
-export const metadata: Metadata = { title: "Dashboard" };
+export const metadata: Metadata = { title: "Painel geral" };
 
 export default async function DashboardPage() {
   const [tickets, user] = await Promise.all([listTickets(), getCurrentUser()]);
@@ -78,12 +78,12 @@ export default async function DashboardPage() {
     <>
       <PageHeader
         title="Visão geral"
-        description="Acompanhe os chamados da central de atendimento."
+        description="Acompanhe os tickets da central de atendimento."
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Chamados em aberto"
+          label="Tickets em aberto"
           value={openCount}
           hint="Aguardando tratamento ou em curso"
           icon={Inbox}
@@ -115,7 +115,7 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Chamados por status</CardTitle>
+            <CardTitle>Tickets por status</CardTitle>
             <CardDescription>Distribuição atual da central.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -124,7 +124,7 @@ export default async function DashboardPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Chamados por setor</CardTitle>
+            <CardTitle>Tickets por setor</CardTitle>
             <CardDescription>Volume por área responsável.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -135,11 +135,11 @@ export default async function DashboardPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Meus chamados em aberto</CardTitle>
+          <CardTitle>Meus tickets em aberto</CardTitle>
           <CardDescription>
             {isStaff
-              ? "Chamados atribuídos a você que ainda estão ativos."
-              : "Seus chamados ativos na central."}
+              ? "Tickets atribuídos a você que ainda estão ativos."
+              : "Seus tickets ativos na central."}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -147,8 +147,8 @@ export default async function DashboardPage() {
             tickets={myTickets}
             emptyHint={
               isStaff
-                ? "Nenhum chamado atribuído a você no momento."
-                : "Você não tem chamados em aberto."
+                ? "Nenhum ticket atribuído a você no momento."
+                : "Você não tem tickets em aberto."
             }
           />
         </CardContent>
@@ -156,7 +156,7 @@ export default async function DashboardPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Chamados recentes</CardTitle>
+          <CardTitle>Tickets recentes</CardTitle>
           <CardDescription>Últimas movimentações na central.</CardDescription>
         </CardHeader>
         <CardContent>

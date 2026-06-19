@@ -9,7 +9,7 @@ import { listClients } from "@/features/clients/queries";
 import { listSectors } from "@/features/sectors/queries";
 import { getCurrentUser } from "@/features/auth/current-user";
 
-export const metadata: Metadata = { title: "Novo chamado" };
+export const metadata: Metadata = { title: "Novo ticket" };
 
 export default async function NovoChamadoPage() {
   const user = await getCurrentUser();
@@ -25,13 +25,13 @@ export default async function NovoChamadoPage() {
         <Button variant="ghost" size="sm" asChild>
           <Link href="/chamados">
             <ArrowLeft data-icon="inline-start" />
-            Chamados
+            Tickets
           </Link>
         </Button>
       </div>
 
       <PageHeader
-        title="Novo chamado"
+        title="Novo ticket"
         description={
           isClient
             ? "Conte o que você precisa e nossa equipe responde por aqui."

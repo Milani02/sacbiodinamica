@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     template: "%s · SAC Biodinâmica",
   },
   description:
-    "Plataforma de atendimento e gestão de chamados da Biodinâmica.",
+    "Plataforma de atendimento e gestão de tickets da Biodinâmica.",
 };
 
 export default function RootLayout({

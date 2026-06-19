@@ -60,7 +60,7 @@ export async function deleteSector(id: string): Promise<ActionResult> {
   if (error) {
     return {
       ok: false,
-      error: "Não foi possível excluir. Há chamados ligados a este setor?",
+      error: "Não foi possível excluir. Há tickets ligados a este setor?",
     };
   }
   revalidate();

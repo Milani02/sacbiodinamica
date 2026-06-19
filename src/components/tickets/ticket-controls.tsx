@@ -35,7 +35,7 @@ function useAction() {
     start(async () => {
       const res = await fn();
       if (res.ok) {
-        toast.success("Chamado atualizado");
+        toast.success("Ticket atualizado");
         router.refresh();
       } else {
         toast.error(res.error ?? "Não foi possível atualizar.");

@@ -73,7 +73,7 @@ export async function deleteClient(id: string): Promise<ActionResult> {
   if (error) {
     return {
       ok: false,
-      error: "Não foi possível excluir. Há chamados ligados a este cliente?",
+      error: "Não foi possível excluir. Há tickets ligados a este cliente?",
     };
   }
   revalidate();

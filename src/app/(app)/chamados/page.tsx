@@ -8,20 +8,20 @@ import { TicketsList } from "@/components/tickets/tickets-list";
 import { listTickets } from "@/features/tickets/queries";
 import { listSectors } from "@/features/sectors/queries";
 
-export const metadata: Metadata = { title: "Chamados" };
+export const metadata: Metadata = { title: "Tickets" };
 
 export default async function ChamadosPage() {
   const [tickets, sectors] = await Promise.all([listTickets(), listSectors()]);
   return (
     <>
       <PageHeader
-        title="Chamados"
+        title="Tickets"
         description="Todos os atendimentos da central."
         actions={
           <Button asChild>
             <Link href="/chamados/novo">
               <Plus data-icon="inline-start" />
-              Novo chamado
+              Novo ticket
             </Link>
           </Button>
         }

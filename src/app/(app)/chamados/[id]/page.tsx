@@ -27,7 +27,7 @@ import { formatDateTime, formatRelative, initials } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { TicketMessage } from "@/types/domain";
 
-export const metadata: Metadata = { title: "Chamado" };
+export const metadata: Metadata = { title: "Ticket" };
 
 function MessageBubble({ message }: { message: TicketMessage }) {
   return (
@@ -91,7 +91,7 @@ export default async function ChamadoDetailPage({
         <Button variant="ghost" size="sm" asChild>
           <Link href="/chamados">
             <ArrowLeft data-icon="inline-start" />
-            Chamados
+            Tickets
           </Link>
         </Button>
         <span className="font-mono text-xs text-muted-foreground">
