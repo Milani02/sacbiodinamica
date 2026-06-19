@@ -16,16 +16,25 @@ const ROLES: UserRole[] = ["admin", "agent", "client"];
 
 export async function updateUser(
   id: string,
-  input: { role: UserRole; sectorId: string | null; isActive: boolean },
+  input: {
+    fullName: string;
+    role: UserRole;
+    sectorId: string | null;
+    isActive: boolean;
+  },
 ): Promise<ActionResult> {
   if (!ROLES.includes(input.role)) {
     return { ok: false, error: "Perfil inválido." };
+  }
+  if (!input.fullName.trim()) {
+    return { ok: false, error: "Informe o nome." };
   }
 
   const supabase = await createClient();
   const { error } = await supabase
     .from("profiles")
     .update({
+      full_name: input.fullName.trim(),
       role: input.role,
       sector_id: input.sectorId,
       is_active: input.isActive,

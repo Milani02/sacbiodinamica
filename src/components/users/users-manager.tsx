@@ -86,6 +86,7 @@ export function UsersManager({
 
   function openEdit(user: User) {
     setEditing(user);
+    setFullName(user.fullName);
     setRole(user.role);
     setSectorId(user.sectorId ?? NO_SECTOR);
     setIsActive(user.isActive);
@@ -116,6 +117,7 @@ export function UsersManager({
     if (!editing) return;
     start(async () => {
       const res = await updateUser(editing.id, {
+        fullName,
         role,
         sectorId: sectorId === NO_SECTOR ? null : sectorId,
         isActive,
@@ -284,6 +286,14 @@ export function UsersManager({
               </DialogDescription>
             </DialogHeader>
             <FieldGroup className="py-4">
+              <Field>
+                <FieldLabel htmlFor="edit-name">Nome completo</FieldLabel>
+                <Input
+                  id="edit-name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+              </Field>
               <div className="grid gap-6 sm:grid-cols-2">
                 <RoleField value={role} onChange={setRole} />
                 <SectorField
