@@ -70,6 +70,10 @@ export interface Ticket {
   assigneeId: string | null;
   status: TicketStatus;
   priority: TicketPriority;
+  /** Topic chosen by the client (null for staff-created tickets). */
+  topic: string | null;
+  /** Structured fields captured by the client's topic form. */
+  details: { fields: { label: string; value: string }[] };
   createdAt: string;
   updatedAt: string;
   closedAt: string | null;

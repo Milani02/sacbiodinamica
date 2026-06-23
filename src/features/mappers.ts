@@ -54,6 +54,8 @@ export function mapTicket(row: Tables["tickets"]["Row"]): Ticket {
     assigneeId: row.assignee_id,
     status: row.status,
     priority: row.priority,
+    topic: row.topic,
+    details: { fields: row.details?.fields ?? [] },
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     closedAt: row.closed_at,

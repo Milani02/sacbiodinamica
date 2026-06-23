@@ -12,7 +12,7 @@
 update public.profiles
 set role = 'admin',
     full_name = coalesce(nullif(full_name, ''), 'Administrador')
-where email = 'TROQUE_PELO_SEU_EMAIL@exemplo.com';
+where email = 'tin8nbio@gmail.com';
 
 -- 2) Setores
 insert into public.sectors (name, description) values

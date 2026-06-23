@@ -4,7 +4,13 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Lock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -112,6 +118,9 @@ export default async function ChamadoDetailPage({
           <Card>
             <CardHeader>
               <CardTitle>Descrição</CardTitle>
+              {ticket.topic ? (
+                <CardDescription>Assunto: {ticket.topic}</CardDescription>
+              ) : null}
             </CardHeader>
             <CardContent>
               <p className="text-sm leading-relaxed whitespace-pre-wrap text-muted-foreground">
@@ -119,6 +128,29 @@ export default async function ChamadoDetailPage({
               </p>
             </CardContent>
           </Card>
+
+          {ticket.details.fields.length > 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Informações do formulário</CardTitle>
+                <CardDescription>
+                  Dados enviados pelo solicitante na abertura.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <dl className="grid gap-4 sm:grid-cols-2">
+                  {ticket.details.fields.map((f, i) => (
+                    <div key={i} className="grid gap-0.5">
+                      <dt className="text-xs text-muted-foreground">
+                        {f.label}
+                      </dt>
+                      <dd className="text-sm break-words">{f.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </CardContent>
+            </Card>
+          ) : null}
 
           <Tabs defaultValue="conversa">
             <TabsList>

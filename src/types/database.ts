@@ -14,6 +14,11 @@ export type TicketStatus =
   | "closed";
 export type TicketPriority = "low" | "medium" | "high" | "urgent";
 
+/** Structured fields captured by the client's topic-based form. */
+export interface TicketDetails {
+  fields?: { label: string; value: string }[];
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -88,6 +93,8 @@ export interface Database {
           assignee_id: string | null;
           status: TicketStatus;
           priority: TicketPriority;
+          topic: string | null;
+          details: TicketDetails;
           created_at: string;
           updated_at: string;
           closed_at: string | null;
@@ -102,6 +109,8 @@ export interface Database {
           assignee_id?: string | null;
           status?: TicketStatus;
           priority?: TicketPriority;
+          topic?: string | null;
+          details?: TicketDetails;
         };
         Update: Partial<Database["public"]["Tables"]["tickets"]["Insert"]>;
         Relationships: [];
@@ -131,6 +140,10 @@ export interface Database {
     Views: Record<string, never>;
     Functions: {
       ensure_my_client: {
+        Args: Record<string, never>;
+        Returns: string;
+      };
+      sac_general_sector_id: {
         Args: Record<string, never>;
         Returns: string;
       };

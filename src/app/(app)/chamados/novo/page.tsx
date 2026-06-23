@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/layout/page-header";
 import { NovoChamadoForm } from "@/components/tickets/novo-chamado-form";
+import { TicketTopicForm } from "@/components/tickets/ticket-topic-form";
 import { listClients } from "@/features/clients/queries";
 import { listSectors } from "@/features/sectors/queries";
 import { getCurrentUser } from "@/features/auth/current-user";
@@ -16,7 +17,7 @@ export default async function NovoChamadoPage() {
   const isClient = user?.role === "client";
   const [clients, sectors] = await Promise.all([
     isClient ? Promise.resolve([]) : listClients(),
-    listSectors(),
+    isClient ? Promise.resolve([]) : listSectors(),
   ]);
 
   return (
@@ -39,11 +40,11 @@ export default async function NovoChamadoPage() {
         }
       />
 
-      <NovoChamadoForm
-        clients={clients}
-        sectors={sectors}
-        isClient={isClient}
-      />
+      {isClient ? (
+        <TicketTopicForm />
+      ) : (
+        <NovoChamadoForm clients={clients} sectors={sectors} />
+      )}
     </>
   );
 }

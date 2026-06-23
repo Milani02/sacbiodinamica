@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/features/auth/current-user";
+import { getTopic } from "@/features/tickets/topics";
 import type { TicketPriority, TicketStatus } from "@/types/domain";
 
 export interface ActionResult {
@@ -70,6 +71,74 @@ export async function createTicket(input: {
       requester_id: requesterId,
       sector_id: input.sectorId,
       priority: input.priority,
+    })
+    .select("id")
+    .single();
+
+  if (error) return { ok: false, error: "Não foi possível abrir o ticket." };
+
+  revalidateTicket(data.id);
+  return { ok: true, id: data.id };
+}
+
+/**
+ * Abertura de ticket pelo cliente via tópico ("Assunto"). Não escolhe setor:
+ * tudo vai para a fila "SAC Geral". Campos extras vão para `details`.
+ * Retorna o id do ticket criado (usado para anexar arquivos no cliente).
+ */
+export async function createTicketFromTopic(input: {
+  topicId: string;
+  values: Record<string, string>;
+}): Promise<ActionResult> {
+  const topic = getTopic(input.topicId);
+  if (!topic) return { ok: false, error: "Assunto inválido." };
+
+  // Validação dos campos obrigatórios.
+  for (const f of topic.fields) {
+    if (f.required && !(input.values[f.key] ?? "").trim()) {
+      return { ok: false, error: `Preencha: ${f.label}.` };
+    }
+  }
+  if (topic.describe?.required && !(input.values[topic.describe.key] ?? "").trim()) {
+    return { ok: false, error: `Preencha: ${topic.describe.label}.` };
+  }
+
+  const me = await getCurrentUser();
+  if (!me) return { ok: false, error: "Sessão expirada. Entre novamente." };
+
+  const supabase = await createClient();
+
+  const [{ data: requesterId }, { data: sectorId }] = await Promise.all([
+    supabase.rpc("ensure_my_client"),
+    supabase.rpc("sac_general_sector_id"),
+  ]);
+  if (!requesterId || !sectorId) {
+    return { ok: false, error: "Não foi possível preparar o atendimento." };
+  }
+
+  const detailFields = topic.fields
+    .map((f) => ({ label: f.label, value: (input.values[f.key] ?? "").trim() }))
+    .filter((d) => d.value);
+
+  const describeValue = topic.describe
+    ? (input.values[topic.describe.key] ?? "").trim()
+    : "";
+  const description = describeValue || topic.description;
+
+  const resumo = (input.values.resumo ?? "").trim();
+  const produto = (input.values.produto ?? "").trim();
+  const title =
+    topic.label + (resumo ? ` — ${resumo}` : produto ? ` — ${produto}` : "");
+
+  const { data, error } = await supabase
+    .from("tickets")
+    .insert({
+      title,
+      description,
+      requester_id: requesterId,
+      sector_id: sectorId,
+      topic: topic.label,
+      details: { fields: detailFields },
     })
     .select("id")
     .single();
