@@ -26,16 +26,24 @@ import { can } from "@/features/auth/roles";
 import { getCurrentUser } from "@/features/auth/current-user";
 import {
   getTicket,
+  getTicketAttachments,
   getTicketMessages,
 } from "@/features/tickets/queries";
+import { AttachmentsList } from "@/components/tickets/attachments-list";
 import { listAgents } from "@/features/users/queries";
 import { formatDateTime, formatRelative, initials } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import type { TicketMessage } from "@/types/domain";
+import type { TicketAttachment, TicketMessage } from "@/types/domain";
 
 export const metadata: Metadata = { title: "Ticket" };
 
-function MessageBubble({ message }: { message: TicketMessage }) {
+function MessageBubble({
+  message,
+  attachments = [],
+}: {
+  message: TicketMessage;
+  attachments?: TicketAttachment[];
+}) {
   return (
     <div className="flex gap-3">
       <Avatar className="size-8">
@@ -65,6 +73,9 @@ function MessageBubble({ message }: { message: TicketMessage }) {
         >
           {message.body}
         </div>
+        {attachments.length > 0 ? (
+          <AttachmentsList attachments={attachments} className="mt-2" />
+        ) : null}
       </div>
     </div>
   );
@@ -83,7 +94,19 @@ export default async function ChamadoDetailPage({
   const ticket = await getTicket(id);
   if (!ticket) notFound();
 
-  const messages = await getTicketMessages(id);
+  const [messages, attachments] = await Promise.all([
+    getTicketMessages(id),
+    getTicketAttachments(id),
+  ]);
+  const formAttachments = attachments.filter((a) => a.messageId === null);
+  const attByMessage = new Map<string, TicketAttachment[]>();
+  for (const a of attachments) {
+    if (a.messageId) {
+      const arr = attByMessage.get(a.messageId) ?? [];
+      arr.push(a);
+      attByMessage.set(a.messageId, arr);
+    }
+  }
   const isStaff = can.respondTickets(user.role);
   const showInternal = can.seeInternalNotes(user.role);
   const agents = isStaff ? await listAgents() : [];
@@ -152,6 +175,20 @@ export default async function ChamadoDetailPage({
             </Card>
           ) : null}
 
+          {formAttachments.length > 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Anexos</CardTitle>
+                <CardDescription>
+                  Arquivos enviados na abertura do ticket.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AttachmentsList attachments={formAttachments} />
+              </CardContent>
+            </Card>
+          ) : null}
+
           <Tabs defaultValue="conversa">
             <TabsList>
               <TabsTrigger value="conversa">
@@ -175,7 +212,13 @@ export default async function ChamadoDetailPage({
 
             <TabsContent value="conversa" className="flex flex-col gap-4">
               {thread.length > 0 ? (
-                thread.map((m) => <MessageBubble key={m.id} message={m} />)
+                thread.map((m) => (
+                  <MessageBubble
+                    key={m.id}
+                    message={m}
+                    attachments={attByMessage.get(m.id)}
+                  />
+                ))
               ) : (
                 <p className="text-sm text-muted-foreground">
                   Nenhuma mensagem ainda. Comece a conversa abaixo.
@@ -189,7 +232,11 @@ export default async function ChamadoDetailPage({
               <TabsContent value="notas" className="flex flex-col gap-4">
                 {internalNotes.length > 0 ? (
                   internalNotes.map((m) => (
-                    <MessageBubble key={m.id} message={m} />
+                    <MessageBubble
+                      key={m.id}
+                      message={m}
+                      attachments={attByMessage.get(m.id)}
+                    />
                   ))
                 ) : (
                   <p className="text-sm text-muted-foreground">

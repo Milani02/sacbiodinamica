@@ -48,6 +48,21 @@ export interface Client {
   createdAt: string;
 }
 
+export interface TicketAttachment {
+  id: string;
+  ticketId: string;
+  messageId: string | null;
+  fieldLabel: string | null;
+  filePath: string;
+  fileName: string;
+  mimeType: string | null;
+  sizeBytes: number | null;
+  createdAt: string;
+  /** Temporary signed URL for viewing/downloading. */
+  url: string | null;
+  isImage: boolean;
+}
+
 export interface TicketMessage {
   id: string;
   ticketId: string;

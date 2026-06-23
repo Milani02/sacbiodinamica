@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createTicketFromTopic } from "@/features/tickets/actions";
+import { uploadAttachment } from "@/features/tickets/upload";
 import { TOPICS, getTopic } from "@/features/tickets/topics";
 
 export function TicketTopicForm() {
@@ -32,6 +33,7 @@ export function TicketTopicForm() {
   const [pending, start] = useTransition();
   const [topicId, setTopicId] = useState("");
   const [values, setValues] = useState<Record<string, string>>({});
+  const [files, setFiles] = useState<Record<string, File[]>>({});
   const [submitted, setSubmitted] = useState(false);
 
   const topic = getTopic(topicId);
@@ -60,12 +62,29 @@ export function TicketTopicForm() {
 
     start(async () => {
       const res = await createTicketFromTopic({ topicId, values });
-      if (res.ok && res.id) {
-        toast.success("Ticket aberto");
-        router.push(`/chamados/${res.id}`);
-      } else {
+      if (!res.ok || !res.id) {
         toast.error(res.error ?? "Não foi possível abrir o ticket.");
+        return;
       }
+
+      // Envia os anexos (se houver) após o ticket existir.
+      const uploads = (topic.files ?? []).flatMap((ff) =>
+        (files[ff.key] ?? []).map((file) =>
+          uploadAttachment({ ticketId: res.id!, file, fieldLabel: ff.label }),
+        ),
+      );
+      if (uploads.length > 0) {
+        const results = await Promise.all(uploads);
+        const failed = results.filter((r) => !r.ok);
+        if (failed.length > 0) {
+          toast.warning(
+            "Ticket aberto, mas alguns anexos falharam ao enviar.",
+          );
+        }
+      }
+
+      toast.success("Ticket aberto");
+      router.push(`/chamados/${res.id}`);
     });
   }
 
@@ -132,6 +151,31 @@ export function TicketTopicForm() {
                     {missing(f.key, f.required) ? (
                       <FieldError>Campo obrigatório.</FieldError>
                     ) : null}
+                  </Field>
+                ))}
+
+                {topic.files.map((ff) => (
+                  <Field key={ff.key}>
+                    <FieldLabel htmlFor={ff.key}>
+                      {ff.label} (opcional)
+                    </FieldLabel>
+                    <Input
+                      id={ff.key}
+                      type="file"
+                      multiple
+                      accept={ff.accept}
+                      onChange={(e) =>
+                        setFiles((prev) => ({
+                          ...prev,
+                          [ff.key]: Array.from(e.target.files ?? []),
+                        }))
+                      }
+                    />
+                    <FieldDescription>
+                      {(files[ff.key]?.length ?? 0) > 0
+                        ? `${files[ff.key].length} arquivo(s) selecionado(s)`
+                        : "Imagens, vídeos ou PDFs até 25 MB."}
+                    </FieldDescription>
                   </Field>
                 ))}
 

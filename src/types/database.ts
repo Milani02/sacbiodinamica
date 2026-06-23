@@ -136,6 +136,35 @@ export interface Database {
         >;
         Relationships: [];
       };
+      ticket_attachments: {
+        Row: {
+          id: string;
+          ticket_id: string;
+          message_id: string | null;
+          uploaded_by: string | null;
+          field_label: string | null;
+          file_path: string;
+          file_name: string;
+          mime_type: string | null;
+          size_bytes: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          ticket_id: string;
+          message_id?: string | null;
+          uploaded_by: string;
+          field_label?: string | null;
+          file_path: string;
+          file_name: string;
+          mime_type?: string | null;
+          size_bytes?: number | null;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["ticket_attachments"]["Insert"]
+        >;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

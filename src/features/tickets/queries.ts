@@ -8,7 +8,11 @@ import {
   mapTicket,
   mapUser,
 } from "@/features/mappers";
-import type { TicketMessage, TicketWithRelations } from "@/types/domain";
+import type {
+  TicketAttachment,
+  TicketMessage,
+  TicketWithRelations,
+} from "@/types/domain";
 
 /**
  * Lists all tickets the current user can see (scoped by RLS), with their
@@ -101,4 +105,42 @@ export async function getTicketMessages(
   );
 
   return rows.map((r) => mapMessage(r, nameById.get(r.author_id) ?? "Usuário"));
+}
+
+export async function getTicketAttachments(
+  ticketId: string,
+): Promise<TicketAttachment[]> {
+  const supabase = await createClient();
+
+  const { data: rows, error } = await supabase
+    .from("ticket_attachments")
+    .select("*")
+    .eq("ticket_id", ticketId)
+    .order("created_at");
+  if (error) throw error;
+  if (!rows || rows.length === 0) return [];
+
+  const { data: signed } = await supabase.storage
+    .from("attachments")
+    .createSignedUrls(
+      rows.map((r) => r.file_path),
+      60 * 60,
+    );
+  const urlByPath = new Map(
+    (signed ?? []).map((s) => [s.path ?? "", s.signedUrl]),
+  );
+
+  return rows.map((r) => ({
+    id: r.id,
+    ticketId: r.ticket_id,
+    messageId: r.message_id,
+    fieldLabel: r.field_label,
+    filePath: r.file_path,
+    fileName: r.file_name,
+    mimeType: r.mime_type,
+    sizeBytes: r.size_bytes,
+    createdAt: r.created_at,
+    url: urlByPath.get(r.file_path) ?? null,
+    isImage: (r.mime_type ?? "").startsWith("image/"),
+  }));
 }

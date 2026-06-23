@@ -215,14 +215,18 @@ export async function addMessage(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Sessão expirada. Entre novamente." };
 
-  const { error } = await supabase.from("ticket_messages").insert({
-    ticket_id: ticketId,
-    author_id: user.id,
-    body: text,
-    is_internal: isInternal,
-  });
+  const { data, error } = await supabase
+    .from("ticket_messages")
+    .insert({
+      ticket_id: ticketId,
+      author_id: user.id,
+      body: text,
+      is_internal: isInternal,
+    })
+    .select("id")
+    .single();
   if (error) return { ok: false, error: "Não foi possível enviar a mensagem." };
 
   revalidateTicket(ticketId);
-  return { ok: true };
+  return { ok: true, id: data.id };
 }
