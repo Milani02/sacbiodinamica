@@ -45,3 +45,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# logo original na raiz (copia versionada fica em public/)
+/logo biodinamica.jpg

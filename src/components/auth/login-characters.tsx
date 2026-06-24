@@ -126,7 +126,7 @@ export function LoginCharacters({
 
   // Verde espia: sobe um pouco e inclina para o formulário (direita).
   const greenPeek = peeking
-    ? "translateY(-10px) rotate(7deg)"
+    ? "translateY(-12px) rotate(13deg)"
     : "translateY(0) rotate(0deg)";
 
   return (

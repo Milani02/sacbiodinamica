@@ -16,7 +16,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { BrandMark } from "@/components/layout/brand-mark";
+import { BrandLogo } from "@/components/layout/brand-logo";
 import { LoginCharacters } from "@/components/auth/login-characters";
 import { createClient } from "@/lib/supabase/client";
 
@@ -71,12 +71,7 @@ export default function LoginPage() {
     <div className="grid min-h-svh lg:grid-cols-2">
       {/* Painel claro com personagens */}
       <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-b from-secondary to-muted p-10 lg:flex">
-        <div className="flex items-center gap-2.5">
-          <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <BrandMark />
-          </div>
-          <span className="font-semibold tracking-tight">SAC Biodinâmica</span>
-        </div>
+        <BrandLogo />
 
         <div className="flex flex-1 items-center justify-center">
           <LoginCharacters
@@ -95,11 +90,8 @@ export default function LoginPage() {
       {/* Painel escuro com o formulário */}
       <div className="dark flex items-center justify-center bg-background p-6 text-foreground sm:p-10">
         <div className="w-full max-w-sm">
-          <div className="mb-8 flex items-center justify-center gap-2.5 lg:hidden">
-            <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <BrandMark />
-            </div>
-            <span className="font-semibold tracking-tight">SAC Biodinâmica</span>
+          <div className="mb-8 flex justify-center lg:hidden">
+            <BrandLogo onDark />
           </div>
 
           <div className="mb-8 grid gap-1.5 text-center">
