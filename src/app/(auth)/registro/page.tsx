@@ -2,20 +2,29 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { MailCheck } from "lucide-react";
+import { Eye, EyeOff, MailCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { BrandMark } from "@/components/layout/brand-mark";
+import { LoginCharacters } from "@/components/auth/login-characters";
 import { createClient } from "@/lib/supabase/client";
 
 export default function RegistroPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmSent, setConfirmSent] = useState(false);
@@ -47,42 +56,39 @@ export default function RegistroPage() {
     }
 
     if (data.session) {
-      // Confirmação de e-mail desativada: já entra direto.
       window.location.assign("/dashboard");
       return;
     }
 
-    // Confirmação de e-mail ativada: aguarda o usuário confirmar.
     setConfirmSent(true);
     setLoading(false);
   }
 
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
-      <div className="relative hidden flex-col justify-between bg-sidebar p-10 text-sidebar-foreground lg:flex">
+      {/* Painel claro com personagens */}
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-b from-secondary to-muted p-10 lg:flex">
         <div className="flex items-center gap-2.5">
-          <div className="flex size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
+          <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <BrandMark />
           </div>
           <span className="font-semibold tracking-tight">SAC Biodinâmica</span>
         </div>
-        <div className="max-w-sm">
-          <p className="text-2xl font-medium leading-snug tracking-tight">
-            Abra um ticket em minutos.
-          </p>
-          <p className="mt-3 text-sm text-sidebar-foreground/70">
-            Crie sua conta para registrar solicitações e conversar com a nossa
-            equipe de atendimento em um só lugar.
-          </p>
+
+        <div className="flex flex-1 items-center justify-center">
+          <LoginCharacters passwordFocused={passwordFocused} />
         </div>
-        <span className="text-xs text-sidebar-foreground/50">
-          © {new Date().getFullYear()} Biodinâmica
-        </span>
+
+        <div className="flex gap-5 text-xs text-muted-foreground">
+          <span>Abra e acompanhe seus tickets</span>
+          <span>© {new Date().getFullYear()} Biodinâmica</span>
+        </div>
       </div>
 
-      <div className="flex items-center justify-center p-6 sm:p-10">
+      {/* Painel escuro com o formulário */}
+      <div className="dark flex items-center justify-center bg-background p-6 text-foreground sm:p-10">
         <div className="w-full max-w-sm">
-          <div className="mb-8 flex items-center gap-2.5 lg:hidden">
+          <div className="mb-8 flex items-center justify-center gap-2.5 lg:hidden">
             <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <BrandMark />
             </div>
@@ -105,10 +111,8 @@ export default function RegistroPage() {
             </div>
           ) : (
             <>
-              <div className="mb-6 grid gap-1.5">
-                <h1 className="text-2xl font-semibold tracking-tight">
-                  Criar conta
-                </h1>
+              <div className="mb-8 grid gap-1.5 text-center">
+                <h1 className="text-3xl font-bold tracking-tight">Criar conta</h1>
                 <p className="text-sm text-muted-foreground">
                   Registre-se como cliente para abrir e acompanhar tickets.
                 </p>
@@ -122,17 +126,19 @@ export default function RegistroPage() {
               ) : null}
 
               <form onSubmit={handleSubmit}>
-                <FieldGroup>
+                <div className="flex flex-col gap-4">
                   <Field>
                     <FieldLabel htmlFor="name">Nome completo</FieldLabel>
                     <Input
                       id="name"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
+                      onFocus={() => setPasswordFocused(false)}
                       autoComplete="name"
                       required
                     />
                   </Field>
+
                   <Field>
                     <FieldLabel htmlFor="email">E-mail</FieldLabel>
                     <Input
@@ -140,31 +146,50 @@ export default function RegistroPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      onFocus={() => setPasswordFocused(false)}
                       placeholder="voce@empresa.com"
                       autoComplete="email"
                       required
                     />
                   </Field>
+
                   <Field>
                     <FieldLabel htmlFor="password">Senha</FieldLabel>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Mínimo 8 caracteres"
-                      autoComplete="new-password"
-                      required
-                    />
+                    <InputGroup>
+                      <InputGroupInput
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onFocus={() => setPasswordFocused(true)}
+                        onBlur={() => setPasswordFocused(false)}
+                        placeholder="Mínimo 8 caracteres"
+                        autoComplete="new-password"
+                        required
+                      />
+                      <InputGroupAddon align="inline-end">
+                        <InputGroupButton
+                          type="button"
+                          variant="ghost"
+                          onClick={() => setShowPassword((s) => !s)}
+                          aria-label={
+                            showPassword ? "Ocultar senha" : "Mostrar senha"
+                          }
+                        >
+                          {showPassword ? <EyeOff /> : <Eye />}
+                        </InputGroupButton>
+                      </InputGroupAddon>
+                    </InputGroup>
                   </Field>
+
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? <Spinner data-icon="inline-start" /> : null}
                     Criar conta
                   </Button>
-                </FieldGroup>
+                </div>
               </form>
 
-              <p className="mt-6 text-center text-sm text-muted-foreground">
+              <p className="mt-8 text-center text-sm text-muted-foreground">
                 Já tem conta?{" "}
                 <Link
                   href="/login"
