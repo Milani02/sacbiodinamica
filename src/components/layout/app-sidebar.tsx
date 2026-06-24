@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -30,18 +31,20 @@ export function AppSidebar({ user }: { user: User }) {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className="flex items-center gap-2.5 px-2 py-1.5">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
+        <div className="flex items-center px-2 py-2">
+          {/* Recolhida: mark compacto */}
+          <div className="hidden aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground group-data-[collapsible=icon]:flex">
             <BrandMark />
           </div>
-          <div className="grid flex-1 leading-tight group-data-[collapsible=icon]:hidden">
-            <span className="truncate font-semibold tracking-tight">
-              SAC Biodinâmica
-            </span>
-            <span className="truncate text-xs text-sidebar-foreground/70">
-              Central de atendimento
-            </span>
-          </div>
+          {/* Expandida: logo branca */}
+          <Image
+            src="/logo-biodinamica-branca.png"
+            alt="Biodinâmica"
+            width={300}
+            height={120}
+            priority
+            className="h-9 w-auto object-contain group-data-[collapsible=icon]:hidden"
+          />
         </div>
       </SidebarHeader>
 
