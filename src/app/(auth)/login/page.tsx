@@ -24,6 +24,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +79,11 @@ export default function LoginPage() {
         </div>
 
         <div className="flex flex-1 items-center justify-center">
-          <LoginCharacters passwordFocused={passwordFocused} />
+          <LoginCharacters
+            emailFocused={emailFocused}
+            passwordFocused={passwordFocused}
+            revealPassword={showPassword}
+          />
         </div>
 
         <div className="flex gap-5 text-xs text-muted-foreground">
@@ -122,7 +127,11 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  onFocus={() => setPasswordFocused(false)}
+                  onFocus={() => {
+                    setEmailFocused(true);
+                    setPasswordFocused(false);
+                  }}
+                  onBlur={() => setEmailFocused(false)}
                   placeholder="voce@biodinamica.com"
                   autoComplete="email"
                   required

@@ -3,9 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Painel de personagens animados (inspirado no modelo escolhido):
- * flutuam suavemente, piscam de tempos em tempos, as pupilas seguem o mouse
- * e os olhos fecham quando o campo de senha está em foco (ninguém espia).
+ * Painel de personagens animados.
+ * - Flutuam suavemente e piscam de tempos em tempos.
+ * - As pupilas seguem o mouse.
+ * - Ao digitar o e-mail, o personagem verde se inclina para o formulário (espia)
+ *   e todos olham para o campo.
+ * - Enquanto a senha está escondida, ficam de olhos abertos tentando ver.
+ * - Quando a senha é revelada, fecham os olhos.
  */
 
 function clamp(v: number, min: number, max: number) {
@@ -20,8 +24,8 @@ function Eyes({
   gap = 16,
   pupil = 7,
 }: {
-  lr: number; // -1..1 horizontal
-  ud: number; // -1..1 vertical
+  lr: number;
+  ud: number;
   closed: boolean;
   size?: number;
   gap?: number;
@@ -60,15 +64,18 @@ function Eyes({
 }
 
 export function LoginCharacters({
-  passwordFocused,
+  emailFocused = false,
+  passwordFocused = false,
+  revealPassword = false,
 }: {
-  passwordFocused: boolean;
+  emailFocused?: boolean;
+  passwordFocused?: boolean;
+  revealPassword?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [look, setLook] = useState({ lr: 0, ud: 0 });
+  const [mouse, setMouse] = useState({ lr: 0, ud: 0 });
   const [blink, setBlink] = useState(false);
 
-  // Pupilas seguem o mouse (relativo ao centro do painel dos personagens).
   useEffect(() => {
     function onMove(e: MouseEvent) {
       const el = ref.current;
@@ -78,7 +85,7 @@ export function LoginCharacters({
       const cy = el
         ? el.getBoundingClientRect().top + el.offsetHeight / 2
         : window.innerHeight / 2;
-      setLook({
+      setMouse({
         lr: clamp((e.clientX - cx) / 320, -1, 1),
         ud: clamp((e.clientY - cy) / 320, -1, 1),
       });
@@ -87,7 +94,6 @@ export function LoginCharacters({
     return () => window.removeEventListener("mousemove", onMove);
   }, []);
 
-  // Piscadas periódicas (com leve aleatoriedade).
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>;
     function schedule() {
@@ -104,8 +110,24 @@ export function LoginCharacters({
     return () => clearTimeout(timeout);
   }, []);
 
-  const closed = passwordFocused || blink;
+  // Olhos fechados só quando a senha é revelada (ou piscando).
+  const closed = revealPassword || blink;
+
+  // Para onde olham: ao mexer no formulário, olham para o campo (direita/baixo);
+  // caso contrário, seguem o mouse.
+  const peeking = emailFocused;
+  let look = mouse;
+  if (passwordFocused && !revealPassword) {
+    look = { lr: 0.7, ud: 0.4 }; // tentando ver a senha
+  } else if (emailFocused) {
+    look = { lr: 0.6, ud: 0.2 };
+  }
   const { lr, ud } = look;
+
+  // Verde espia: sobe um pouco e inclina para o formulário (direita).
+  const greenPeek = peeking
+    ? "translateY(-10px) rotate(7deg)"
+    : "translateY(0) rotate(0deg)";
 
   return (
     <div ref={ref} className="relative h-72 w-full max-w-md" aria-hidden>
@@ -115,12 +137,8 @@ export function LoginCharacters({
         style={{ animationDelay: "0s" }}
       >
         <div
-          className="size-full rounded-t-[3.5rem] transition-transform duration-500"
-          style={{
-            background: "var(--char-green)",
-            transform: passwordFocused ? "rotate(-7deg)" : "rotate(0deg)",
-            transformOrigin: "bottom center",
-          }}
+          className="size-full rounded-t-[3.5rem] transition-transform duration-500 ease-out"
+          style={{ background: "var(--char-green)", transform: greenPeek, transformOrigin: "bottom center" }}
         >
           <div className="absolute left-1/2 top-9 -translate-x-1/2">
             <Eyes lr={lr} ud={ud} closed={closed} />
