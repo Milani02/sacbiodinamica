@@ -186,6 +186,26 @@
   --prio-urgent: oklch(0.72 0.19 27);
 }
 
+@keyframes char-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.char-bob {
+  animation: char-bob 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .char-bob {
+    animation: none;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

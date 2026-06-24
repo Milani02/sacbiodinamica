@@ -78,10 +78,7 @@ export default function LoginPage() {
         </div>
 
         <div className="flex flex-1 items-center justify-center">
-          <LoginCharacters
-            emailLength={email.length}
-            passwordFocused={passwordFocused}
-          />
+          <LoginCharacters passwordFocused={passwordFocused} />
         </div>
 
         <div className="flex gap-5 text-xs text-muted-foreground">

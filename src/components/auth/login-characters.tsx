@@ -1,25 +1,35 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+
 /**
  * Painel de personagens animados (inspirado no modelo escolhido):
- * as pupilas acompanham o que se digita no e-mail e os olhos "fecham"
- * quando o campo de senha está em foco — ninguém espia a senha.
+ * flutuam suavemente, piscam de tempos em tempos, as pupilas seguem o mouse
+ * e os olhos fecham quando o campo de senha está em foco (ninguém espia).
  */
 
+function clamp(v: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, v));
+}
+
 function Eyes({
-  look,
+  lr,
+  ud,
   closed,
   size = 16,
   gap = 16,
   pupil = 7,
 }: {
-  look: number; // -1..1 (horizontal)
+  lr: number; // -1..1 horizontal
+  ud: number; // -1..1 vertical
   closed: boolean;
   size?: number;
   gap?: number;
   pupil?: number;
 }) {
-  const tx = look * (size / 2 - pupil / 2 - 1);
+  const range = size / 2 - pupil / 2 - 1;
+  const tx = lr * range;
+  const ty = ud * range * 0.7;
   return (
     <div className="flex items-center" style={{ gap }}>
       {[0, 1].map((i) => (
@@ -29,7 +39,7 @@ function Eyes({
           style={{
             width: size,
             height: closed ? 3 : size,
-            transition: "height .28s ease",
+            transition: "height .18s ease",
           }}
         >
           {!closed ? (
@@ -38,8 +48,8 @@ function Eyes({
               style={{
                 width: pupil,
                 height: pupil,
-                transform: `translateX(${tx}px)`,
-                transition: "transform .18s ease",
+                transform: `translate(${tx}px, ${ty}px)`,
+                transition: "transform .12s ease-out",
               }}
             />
           ) : null}
@@ -50,60 +60,117 @@ function Eyes({
 }
 
 export function LoginCharacters({
-  emailLength,
   passwordFocused,
 }: {
-  emailLength: number;
   passwordFocused: boolean;
 }) {
-  // pupilas vão da esquerda (0) para a direita conforme digita o e-mail
-  const look = Math.min(emailLength, 18) / 18; // 0..1
-  const lr = -1 + look * 2; // -1..1
+  const ref = useRef<HTMLDivElement>(null);
+  const [look, setLook] = useState({ lr: 0, ud: 0 });
+  const [blink, setBlink] = useState(false);
+
+  // Pupilas seguem o mouse (relativo ao centro do painel dos personagens).
+  useEffect(() => {
+    function onMove(e: MouseEvent) {
+      const el = ref.current;
+      const cx = el
+        ? el.getBoundingClientRect().left + el.offsetWidth / 2
+        : window.innerWidth / 2;
+      const cy = el
+        ? el.getBoundingClientRect().top + el.offsetHeight / 2
+        : window.innerHeight / 2;
+      setLook({
+        lr: clamp((e.clientX - cx) / 320, -1, 1),
+        ud: clamp((e.clientY - cy) / 320, -1, 1),
+      });
+    }
+    window.addEventListener("mousemove", onMove);
+    return () => window.removeEventListener("mousemove", onMove);
+  }, []);
+
+  // Piscadas periódicas (com leve aleatoriedade).
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+    function schedule() {
+      timeout = setTimeout(
+        () => {
+          setBlink(true);
+          setTimeout(() => setBlink(false), 140);
+          schedule();
+        },
+        2400 + Math.random() * 2600,
+      );
+    }
+    schedule();
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const closed = passwordFocused || blink;
+  const { lr, ud } = look;
 
   return (
-    <div className="relative h-72 w-full max-w-md" aria-hidden>
+    <div ref={ref} className="relative h-72 w-full max-w-md" aria-hidden>
       {/* personagem verde (alto) */}
       <div
-        className="absolute left-[18%] bottom-0 h-60 w-32 rounded-t-[3.5rem] transition-transform duration-500"
-        style={{
-          background: "var(--char-green)",
-          transform: passwordFocused ? "rotate(-7deg)" : "rotate(0deg)",
-          transformOrigin: "bottom center",
-        }}
+        className="char-bob absolute left-[18%] bottom-0 h-60 w-32"
+        style={{ animationDelay: "0s" }}
       >
-        <div className="absolute left-1/2 top-9 -translate-x-1/2">
-          <Eyes look={lr} closed={passwordFocused} />
+        <div
+          className="size-full rounded-t-[3.5rem] transition-transform duration-500"
+          style={{
+            background: "var(--char-green)",
+            transform: passwordFocused ? "rotate(-7deg)" : "rotate(0deg)",
+            transformOrigin: "bottom center",
+          }}
+        >
+          <div className="absolute left-1/2 top-9 -translate-x-1/2">
+            <Eyes lr={lr} ud={ud} closed={closed} />
+          </div>
         </div>
       </div>
 
       {/* personagem carvão (estreito) */}
       <div
-        className="absolute left-[42%] bottom-0 h-48 w-24 rounded-t-[3rem] transition-transform duration-500"
-        style={{ background: "var(--char-dark)" }}
+        className="char-bob absolute left-[42%] bottom-0 h-48 w-24"
+        style={{ animationDelay: "0.8s" }}
       >
-        <div className="absolute left-1/2 top-8 -translate-x-1/2">
-          <Eyes look={lr} closed={passwordFocused} size={13} gap={12} pupil={6} />
+        <div
+          className="size-full rounded-t-[3rem]"
+          style={{ background: "var(--char-dark)" }}
+        >
+          <div className="absolute left-1/2 top-8 -translate-x-1/2">
+            <Eyes lr={lr} ud={ud} closed={closed} size={13} gap={12} pupil={6} />
+          </div>
         </div>
       </div>
 
       {/* personagem laranja (domo grande) */}
       <div
-        className="absolute left-0 bottom-0 h-44 w-52 rounded-t-full"
-        style={{ background: "var(--char-orange)" }}
+        className="char-bob absolute left-0 bottom-0 h-44 w-52"
+        style={{ animationDelay: "1.4s" }}
       >
-        <div className="absolute left-1/2 top-16 -translate-x-1/2">
-          <Eyes look={lr} closed={passwordFocused} size={14} gap={28} pupil={6} />
+        <div
+          className="size-full rounded-t-full"
+          style={{ background: "var(--char-orange)" }}
+        >
+          <div className="absolute left-1/2 top-16 -translate-x-1/2">
+            <Eyes lr={lr} ud={ud} closed={closed} size={14} gap={28} pupil={6} />
+          </div>
         </div>
       </div>
 
       {/* personagem amarelo (domo com boca) */}
       <div
-        className="absolute right-0 bottom-0 h-52 w-40 rounded-t-full"
-        style={{ background: "var(--char-yellow)" }}
+        className="char-bob absolute right-0 bottom-0 h-52 w-40"
+        style={{ animationDelay: "0.4s" }}
       >
-        <div className="absolute left-1/2 top-12 -translate-x-1/2 flex flex-col items-center gap-3">
-          <Eyes look={lr} closed={passwordFocused} size={13} gap={26} pupil={6} />
-          <div className="h-0.5 w-8 rounded-full bg-neutral-900/80" />
+        <div
+          className="size-full rounded-t-full"
+          style={{ background: "var(--char-yellow)" }}
+        >
+          <div className="absolute left-1/2 top-12 -translate-x-1/2 flex flex-col items-center gap-3">
+            <Eyes lr={lr} ud={ud} closed={closed} size={13} gap={26} pupil={6} />
+            <div className="h-0.5 w-8 rounded-full bg-neutral-900/80" />
+          </div>
         </div>
       </div>
     </div>
