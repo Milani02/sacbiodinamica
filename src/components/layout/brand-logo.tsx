@@ -22,7 +22,7 @@ export function BrandLogo({
       priority
       className={cn(
         // largura proporcional fixa (ratio ~2.5:1) p/ não esticar no flex-col
-        "h-auto w-[120px] shrink-0 self-start object-contain",
+        "h-auto w-[170px] shrink-0 self-start object-contain",
         onDark ? "rounded-md bg-white p-1.5" : null,
         className,
       )}
