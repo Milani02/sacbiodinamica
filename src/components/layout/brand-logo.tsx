@@ -21,8 +21,9 @@ export function BrandLogo({
       height={120}
       priority
       className={cn(
-        "h-10 w-auto",
-        onDark ? "rounded-md bg-white px-2.5 py-1.5" : null,
+        // largura proporcional fixa (ratio ~2.5:1) p/ não esticar no flex-col
+        "h-auto w-[120px] shrink-0 self-start object-contain",
+        onDark ? "rounded-md bg-white p-1.5" : null,
         className,
       )}
     />
