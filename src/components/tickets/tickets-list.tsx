@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 
 import {
   Select,
@@ -17,7 +17,11 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
-import { TicketsTable } from "@/components/tickets/tickets-table";
+import {
+  TicketsTable,
+  type TicketSort,
+  type TicketSortKey,
+} from "@/components/tickets/tickets-table";
 import {
   TICKET_PRIORITY,
   TICKET_PRIORITY_ORDER,
@@ -27,18 +31,51 @@ import {
 import type { Sector, TicketWithRelations } from "@/types/domain";
 
 const ALL = "all";
+const PAGE_SIZE = 10;
+
+// Direção padrão ao clicar numa coluna pela primeira vez.
+const DEFAULT_DIR: Record<TicketSortKey, "asc" | "desc"> = {
+  code: "asc",
+  status: "asc",
+  priority: "desc",
+  updatedAt: "desc",
+};
+
+function compare(
+  a: TicketWithRelations,
+  b: TicketWithRelations,
+  key: TicketSortKey,
+): number {
+  switch (key) {
+    case "code":
+      return a.code.localeCompare(b.code);
+    case "status":
+      return (
+        TICKET_STATUS_ORDER.indexOf(a.status) -
+        TICKET_STATUS_ORDER.indexOf(b.status)
+      );
+    case "priority":
+      return TICKET_PRIORITY[a.priority].weight - TICKET_PRIORITY[b.priority].weight;
+    case "updatedAt":
+      return +new Date(a.updatedAt) - +new Date(b.updatedAt);
+  }
+}
 
 export function TicketsList({
   tickets,
   sectors,
+  initialQuery = "",
 }: {
   tickets: TicketWithRelations[];
   sectors: Sector[];
+  initialQuery?: string;
 }) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
   const [status, setStatus] = useState<string>(ALL);
   const [priority, setPriority] = useState<string>(ALL);
   const [sector, setSector] = useState<string>(ALL);
+  const [sort, setSort] = useState<TicketSort>({ key: "updatedAt", dir: "desc" });
+  const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -55,15 +92,58 @@ export function TicketsList({
     });
   }, [tickets, query, status, priority, sector]);
 
+  const sorted = useMemo(() => {
+    const mult = sort.dir === "asc" ? 1 : -1;
+    return [...filtered].sort((a, b) => compare(a, b, sort.key) * mult);
+  }, [filtered, sort]);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageItems = sorted.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+
   const hasFilters =
     query !== "" || status !== ALL || priority !== ALL || sector !== ALL;
+
+  // Qualquer mudança de filtro/busca/ordenação volta para a 1ª página.
+  function setQueryReset(v: string) {
+    setQuery(v);
+    setPage(1);
+  }
+  function setStatusReset(v: string) {
+    setStatus(v);
+    setPage(1);
+  }
+  function setPriorityReset(v: string) {
+    setPriority(v);
+    setPage(1);
+  }
+  function setSectorReset(v: string) {
+    setSector(v);
+    setPage(1);
+  }
 
   function clearFilters() {
     setQuery("");
     setStatus(ALL);
     setPriority(ALL);
     setSector(ALL);
+    setPage(1);
   }
+
+  function handleSort(key: TicketSortKey) {
+    setSort((prev) =>
+      prev.key === key
+        ? { key, dir: prev.dir === "asc" ? "desc" : "asc" }
+        : { key, dir: DEFAULT_DIR[key] },
+    );
+    setPage(1);
+  }
+
+  const from = sorted.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const to = Math.min(currentPage * PAGE_SIZE, sorted.length);
 
   return (
     <div className="flex flex-col gap-4">
@@ -75,12 +155,12 @@ export function TicketsList({
           <InputGroupInput
             placeholder="Buscar por código, título ou cliente..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => setQueryReset(e.target.value)}
           />
         </InputGroup>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Select value={status} onValueChange={setStatus}>
+          <Select value={status} onValueChange={setStatusReset}>
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
@@ -96,7 +176,7 @@ export function TicketsList({
             </SelectContent>
           </Select>
 
-          <Select value={priority} onValueChange={setPriority}>
+          <Select value={priority} onValueChange={setPriorityReset}>
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Prioridade" />
             </SelectTrigger>
@@ -112,7 +192,7 @@ export function TicketsList({
             </SelectContent>
           </Select>
 
-          <Select value={sector} onValueChange={setSector}>
+          <Select value={sector} onValueChange={setSectorReset}>
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Setor" />
             </SelectTrigger>
@@ -137,22 +217,52 @@ export function TicketsList({
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {filtered.length}{" "}
-          {filtered.length === 1 ? "ticket" : "tickets"}
-          {hasFilters ? " (filtrados)" : ""}
-        </p>
-      </div>
+      <p className="text-sm text-muted-foreground">
+        {sorted.length} {sorted.length === 1 ? "ticket" : "tickets"}
+        {hasFilters ? " (filtrados)" : ""}
+      </p>
 
       <TicketsTable
-        tickets={filtered}
+        tickets={pageItems}
+        sort={sort}
+        onSort={handleSort}
         emptyHint={
           hasFilters
             ? "Nenhum ticket corresponde aos filtros. Ajuste a busca."
             : undefined
         }
       />
+
+      {totalPages > 1 ? (
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground tabular-nums">
+            {from}–{to} de {sorted.length}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              <ChevronLeft data-icon="inline-start" />
+              Anterior
+            </Button>
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {currentPage} / {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
+              Próxima
+              <ChevronRight data-icon="inline-end" />
+            </Button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

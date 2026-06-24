@@ -10,8 +10,16 @@ import { listSectors } from "@/features/sectors/queries";
 
 export const metadata: Metadata = { title: "Tickets" };
 
-export default async function ChamadosPage() {
-  const [tickets, sectors] = await Promise.all([listTickets(), listSectors()]);
+export default async function ChamadosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const [{ q }, tickets, sectors] = await Promise.all([
+    searchParams,
+    listTickets(),
+    listSectors(),
+  ]);
   return (
     <>
       <PageHeader
@@ -26,7 +34,12 @@ export default async function ChamadosPage() {
           </Button>
         }
       />
-      <TicketsList tickets={tickets} sectors={sectors} />
+      <TicketsList
+        key={`q:${q ?? ""}`}
+        tickets={tickets}
+        sectors={sectors}
+        initialQuery={q ?? ""}
+      />
     </>
   );
 }

@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import {
   Card,
   CardContent,
@@ -116,17 +123,19 @@ export default async function ChamadoDetailPage({
 
   return (
     <>
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/chamados">
-            <ArrowLeft data-icon="inline-start" />
-            Tickets
-          </Link>
-        </Button>
-        <span className="font-mono text-xs text-muted-foreground">
-          {ticket.code}
-        </span>
-      </div>
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/chamados">Tickets</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage className="font-mono">{ticket.code}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <h2 className="text-2xl font-semibold tracking-tight">{ticket.title}</h2>
@@ -295,9 +304,15 @@ export default async function ChamadoDetailPage({
               </Detail>
             ) : null}
             <Separator />
-            <Detail label="Aberto em">{formatDateTime(ticket.createdAt)}</Detail>
+            <Detail label="Aberto em">
+              <span className="tabular-nums">
+                {formatDateTime(ticket.createdAt)}
+              </span>
+            </Detail>
             <Detail label="Atualizado em">
-              {formatDateTime(ticket.updatedAt)}
+              <span className="tabular-nums">
+                {formatDateTime(ticket.updatedAt)}
+              </span>
             </Detail>
           </CardContent>
         </Card>
