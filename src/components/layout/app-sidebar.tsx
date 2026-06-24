@@ -59,6 +59,7 @@ export function AppSidebar({ user }: { user: User }) {
                       asChild
                       isActive={active}
                       tooltip={item.title}
+                      className="transition-colors data-[active=true]:font-medium data-[active=true]:[&>svg]:text-sidebar-primary"
                     >
                       <Link href={item.href}>
                         <item.icon />
@@ -74,12 +75,15 @@ export function AppSidebar({ user }: { user: User }) {
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="flex items-center gap-2.5 px-2 py-1.5">
-          <Avatar className="size-8">
-            <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground text-xs">
-              {initials(user.fullName)}
-            </AvatarFallback>
-          </Avatar>
+        <div className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 group-data-[collapsible=icon]:px-0 transition-colors hover:bg-sidebar-accent/60">
+          <div className="relative">
+            <Avatar className="size-8">
+              <AvatarFallback className="bg-sidebar-accent text-sidebar-accent-foreground text-xs">
+                {initials(user.fullName)}
+              </AvatarFallback>
+            </Avatar>
+            <span className="absolute -right-0.5 -bottom-0.5 size-2.5 rounded-full bg-sidebar-primary ring-2 ring-sidebar" />
+          </div>
           <div className="grid flex-1 leading-tight group-data-[collapsible=icon]:hidden">
             <span className="truncate text-sm font-medium">{user.fullName}</span>
             <span className="truncate text-xs text-sidebar-foreground/70">

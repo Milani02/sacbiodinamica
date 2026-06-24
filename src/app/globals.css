@@ -68,8 +68,9 @@
 }
 
 :root {
-  /* Warm near-white with a faint stone-green tint — calm for all-day use */
-  --background: oklch(0.992 0.003 120);
+  /* Warm near-white with a faint stone-green tint — calm for all-day use.
+     Slightly deeper than the cards so surfaces gain depth. */
+  --background: oklch(0.984 0.004 125);
   --foreground: oklch(0.24 0.02 150);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.24 0.02 150);
@@ -203,6 +204,25 @@
 @media (prefers-reduced-motion: reduce) {
   .char-bob {
     animation: none;
+  }
+}
+
+/* Hover sutil para superfícies interativas (cards clicáveis) */
+.surface-hover {
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+.surface-hover:hover {
+  border-color: color-mix(in oklab, var(--primary) 35%, var(--border));
+  box-shadow:
+    0 1px 2px oklch(0.25 0.02 150 / 0.05),
+    0 10px 28px oklch(0.25 0.02 150 / 0.07);
+}
+@media (prefers-reduced-motion: reduce) {
+  .surface-hover {
+    transition: none;
   }
 }
 

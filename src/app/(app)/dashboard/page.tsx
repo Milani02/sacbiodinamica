@@ -77,6 +77,7 @@ export default async function DashboardPage() {
   return (
     <>
       <PageHeader
+        eyebrow="Painel geral"
         title="Visão geral"
         description="Acompanhe os tickets da central de atendimento."
       />

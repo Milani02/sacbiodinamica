@@ -55,10 +55,10 @@ export function TicketsTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border">
+    <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
       <Table>
         <TableHeader>
-          <TableRow className="hover:bg-transparent">
+          <TableRow className="bg-muted/40 hover:bg-muted/40 [&>th]:h-10 [&>th]:text-xs [&>th]:font-medium [&>th]:uppercase [&>th]:tracking-wide">
             <TableHead className="w-1 p-0" />
             <TableHead className="w-[120px]">Código</TableHead>
             <TableHead>Assunto</TableHead>

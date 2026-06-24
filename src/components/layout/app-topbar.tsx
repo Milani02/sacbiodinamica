@@ -37,23 +37,26 @@ export function AppTopbar({ user }: { user: User }) {
   const title = useSectionTitle();
 
   return (
-    <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-3 border-b bg-background/80 px-4 backdrop-blur-md">
+    <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-3 border-b bg-background/75 px-4 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
       <SidebarTrigger className="-ml-1" />
       <Separator orientation="vertical" className="h-5" />
       <h1 className="text-sm font-semibold tracking-tight">{title}</h1>
 
       <div className="ml-auto flex items-center gap-2">
-        <InputGroup className="hidden w-64 sm:flex">
+        <InputGroup className="hidden w-64 rounded-full bg-muted/50 sm:flex">
           <InputGroupAddon>
             <Search />
           </InputGroupAddon>
-          <InputGroupInput placeholder="Buscar tickets" />
+          <InputGroupInput
+            placeholder="Buscar tickets"
+            className="bg-transparent"
+          />
         </InputGroup>
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
+          <DropdownMenuTrigger className="rounded-full outline-none ring-2 ring-transparent transition-colors hover:ring-border focus-visible:ring-ring/50">
             <Avatar className="size-8">
-              <AvatarFallback className="bg-primary/10 text-xs text-primary">
+              <AvatarFallback className="bg-primary/10 text-xs font-medium text-primary">
                 {initials(user.fullName)}
               </AvatarFallback>
             </Avatar>

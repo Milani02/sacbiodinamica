@@ -23,23 +23,25 @@ export function StatCard({
   accent?: string;
 }) {
   return (
-    <Card>
+    <Card className="surface-hover">
       <CardHeader>
-        <CardDescription>{label}</CardDescription>
-        <CardTitle className="text-3xl tabular-nums tracking-tight">
+        <CardDescription className="text-xs font-medium uppercase tracking-wide">
+          {label}
+        </CardDescription>
+        <CardTitle className="text-3xl font-semibold tabular-nums tracking-tight">
           {value}
         </CardTitle>
         {hint ? (
-          <CardDescription className="text-xs">{hint}</CardDescription>
+          <p className="text-xs text-muted-foreground">{hint}</p>
         ) : null}
         <CardAction>
           <div
             className={cn(
-              "flex size-9 items-center justify-center rounded-lg bg-muted",
+              "flex size-10 items-center justify-center rounded-xl bg-current/10 ring-1 ring-inset ring-current/15",
               accent,
             )}
           >
-            <Icon className="size-4.5" />
+            <Icon className="size-5" />
           </div>
         </CardAction>
       </CardHeader>
