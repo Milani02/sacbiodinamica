@@ -94,7 +94,10 @@ export function TicketTopicForm() {
         <form onSubmit={handleSubmit} noValidate>
           <FieldGroup>
             <Field>
-              <FieldLabel>Assunto</FieldLabel>
+              <FieldLabel>
+                Assunto
+                <span className="text-destructive"> *</span>
+              </FieldLabel>
               <Select
                 value={topicId}
                 onValueChange={(v) => {
@@ -119,7 +122,8 @@ export function TicketTopicForm() {
                 <FieldDescription>{topic.description}</FieldDescription>
               ) : (
                 <FieldDescription>
-                  Escolha o assunto para vermos os campos certos.
+                  Selecione o assunto desejado para que possamos atendê-lo
+                  corretamente.
                 </FieldDescription>
               )}
             </Field>
@@ -130,7 +134,13 @@ export function TicketTopicForm() {
                   <Field key={f.key} data-invalid={missing(f.key, f.required)}>
                     <FieldLabel htmlFor={f.key}>
                       {f.label}
-                      {f.required ? "" : " (opcional)"}
+                      {f.required ? (
+                        <span className="text-destructive"> *</span>
+                      ) : f.hideOptionalHint ? (
+                        ""
+                      ) : (
+                        " (opcional)"
+                      )}
                     </FieldLabel>
                     {f.type === "textarea" ? (
                       <Textarea
@@ -188,7 +198,11 @@ export function TicketTopicForm() {
                   >
                     <FieldLabel htmlFor={topic.describe.key}>
                       {topic.describe.label}
-                      {topic.describe.required ? "" : " (opcional)"}
+                      {topic.describe.required ? (
+                        <span className="text-destructive"> *</span>
+                      ) : (
+                        " (opcional)"
+                      )}
                     </FieldLabel>
                     <Textarea
                       id={topic.describe.key}

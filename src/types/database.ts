@@ -67,7 +67,6 @@ export interface Database {
           name: string;
           email: string;
           phone: string | null;
-          company: string | null;
           auth_user_id: string | null;
           created_at: string;
         };
@@ -76,7 +75,6 @@ export interface Database {
           name: string;
           email: string;
           phone?: string | null;
-          company?: string | null;
           auth_user_id?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["clients"]["Insert"]>;
@@ -93,6 +91,7 @@ export interface Database {
           assignee_id: string | null;
           status: TicketStatus;
           priority: TicketPriority;
+          category: string | null;
           topic: string | null;
           details: TicketDetails;
           created_at: string;
@@ -109,6 +108,7 @@ export interface Database {
           assignee_id?: string | null;
           status?: TicketStatus;
           priority?: TicketPriority;
+          category?: string | null;
           topic?: string | null;
           details?: TicketDetails;
         };
@@ -175,6 +175,10 @@ export interface Database {
       sac_general_sector_id: {
         Args: Record<string, never>;
         Returns: string;
+      };
+      ticket_message_authors: {
+        Args: { p_ticket_id: string };
+        Returns: { id: string; full_name: string }[];
       };
     };
     Enums: {

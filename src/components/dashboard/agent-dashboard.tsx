@@ -36,14 +36,19 @@ export function AgentDashboard({
     ["high", "urgent"].includes(t.priority),
   ).length;
 
-  const myQueue = user.sectorId
-    ? tickets.filter(
-        (t) =>
-          t.sectorId === user.sectorId &&
-          t.assigneeId === null &&
-          ACTIVE_STATUSES.includes(t.status),
-      )
-    : [];
+  // Fila compartilhada de atendimento: todo ticket novo (sem responsável e
+  // ativo) aparece aqui para qualquer atendente, sem depender do setor.
+  const queue = tickets.filter(
+    (t) => t.assigneeId === null && ACTIVE_STATUSES.includes(t.status),
+  );
+
+  // "Meus tickets em aberto": os atribuídos a mim + os novos ainda sem
+  // responsável, para que todo ticket novo apareça aqui automaticamente.
+  const openForMe = tickets.filter(
+    (t) =>
+      ACTIVE_STATUSES.includes(t.status) &&
+      (t.assigneeId === user.id || t.assigneeId === null),
+  );
 
   const statusData = TICKET_STATUS_ORDER.map((s) => ({
     key: s,
@@ -80,9 +85,9 @@ export function AgentDashboard({
           accent="text-status-waiting"
         />
         <StatCard
-          label="Fila do meu setor"
-          value={myQueue.length}
-          hint="Sem responsável, prontos para assumir"
+          label="Fila de atendimento"
+          value={queue.length}
+          hint="Tickets novos aguardando atendimento"
           icon={Layers}
           accent="text-status-new"
         />
@@ -100,13 +105,14 @@ export function AgentDashboard({
           <CardHeader>
             <CardTitle>Meus tickets em aberto</CardTitle>
             <CardDescription>
-              Tickets ativos atribuídos a você.
+              Seus tickets e os novos ainda sem responsável.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <TicketsTable
-              tickets={mineActive}
-              emptyHint="Nenhum ticket atribuído a você no momento."
+              tickets={openForMe}
+              showCategory
+              emptyHint="Nenhum ticket em aberto no momento."
             />
           </CardContent>
         </Card>
@@ -121,23 +127,6 @@ export function AgentDashboard({
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Fila do meu setor</CardTitle>
-          <CardDescription>
-            {user.sectorId
-              ? "Tickets do seu setor ainda sem responsável."
-              : "Você não está vinculado a um setor. Peça a um administrador para definir o seu setor."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <TicketsTable
-            tickets={myQueue}
-            emptyHint="Nenhum ticket aguardando na fila do seu setor."
-          />
-        </CardContent>
-      </Card>
     </>
   );
 }

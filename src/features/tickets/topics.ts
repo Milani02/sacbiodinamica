@@ -10,6 +10,8 @@ export interface TopicField {
   label: string;
   type: TopicFieldType;
   required?: boolean;
+  /** Não-obrigatório, mas sem exibir o sufixo "(opcional)" no rótulo. */
+  hideOptionalHint?: boolean;
 }
 
 export interface TopicFileField {
@@ -33,11 +35,12 @@ export interface Topic {
 }
 
 // ---- Campos reutilizados ----
-const razao: TopicField = { key: "razao_social", label: "Razão social", type: "text", required: true };
-const cnpj: TopicField = { key: "cnpj", label: "Número do CNPJ", type: "text", required: true };
+const razao: TopicField = { key: "razao_social", label: "Nome ou Razão Social", type: "text", required: true };
+const cnpj: TopicField = { key: "cnpj", label: "Número do CPF ou CNPJ", type: "text", required: true };
 const endereco: TopicField = { key: "endereco", label: "Endereço completo com CEP", type: "text", required: true };
-const nf: TopicField = { key: "nf", label: "Número da NF", type: "text", required: true };
-const produto: TopicField = { key: "produto", label: "Produto", type: "text", required: true };
+const nf: TopicField = { key: "nf", label: "Número da NF", type: "text", hideOptionalHint: true };
+const produto: TopicField = { key: "produto", label: "Produto / Lote", type: "text", required: true };
+const produtoOpcional: TopicField = { key: "produto", label: "Produto / Lote", type: "text" };
 const telefone: TopicField = { key: "telefone", label: "Telefone para contato", type: "text", required: true };
 const transportadora: TopicField = { key: "transportadora", label: "Transportadora", type: "text", required: true };
 
@@ -49,73 +52,62 @@ const documentos: TopicFileField = { key: "documentos", label: "Documentos", acc
 
 export const TOPICS: Topic[] = [
   {
-    id: "produto-divergente",
-    label: "Produto divergente",
-    description: "Produto enviado incorreto, quantidade errada ou falta de produtos.",
+    id: "produto-defeito",
+    label: "Produto com desvio",
+    description:
+      "Produto com vazamento, problemas com a embalagem, alteração de cor ou consistência, não funciona corretamente, etc.",
     fields: [razao, cnpj, endereco, nf, produto],
     files: [fotoProduto],
     describe: descrever,
   },
   {
-    id: "produto-avaria",
-    label: "Produto com vazamento ou falta de componentes",
-    description: "Avaria na embalagem, vazamentos ou falta de algum item.",
-    fields: [razao, cnpj, endereco, nf, produto],
-    files: [fotoProduto],
-    describe: descrever,
-  },
-  {
-    id: "produto-nao-conforme",
-    label: "Produto não conforme",
-    description: "Produto não atingiu as expectativas, resultado fora do padrão.",
+    id: "pedido",
+    label: "Pedido (informações, acompanhamento ou problemas)",
+    description:
+      "Divergência de quantidade de produtos com o pedido ou NF, cancelamento do pedido, etc.",
     fields: [razao, cnpj, endereco, nf, produto],
     files: [fotoProduto],
     describe: descrever,
   },
   {
     id: "transportadora",
-    label: "Problemas com transportadora",
-    description: "Produtos trocados, avarias, atraso na entrega, roubos etc.",
+    label: "Entrega e transportadora",
+    description: "Produtos trocados, avarias, atraso na entrega, roubo, etc.",
     fields: [razao, cnpj, transportadora, nf],
     files: [fotosVideos],
     describe: descrever,
   },
   {
-    id: "pedido-incorreto",
-    label: "Compra / pedidos incorretos",
-    description: "Compra ou pedido gerado de forma incorreta, cancelamento.",
-    fields: [razao, cnpj, endereco, nf, produto],
-    files: [fotoProduto],
-    describe: descrever,
-  },
-  {
     id: "duvidas-tecnicas",
     label: "Informações e dúvidas técnicas",
-    description: "Informações sobre os produtos e dúvidas técnicas de utilização.",
+    description:
+      "Informações sobre os produtos, dúvidas técnicas, modo de uso, etc.",
     fields: [razao, cnpj, endereco, telefone, produto],
     files: [],
     describe: { key: "duvida", label: "Dúvida", type: "textarea", required: true },
   },
   {
     id: "regulatorio",
-    label: "Assuntos regulatórios",
-    description: "Alvará, Licença Sanitária, FISPQ, instruções de uso etc.",
-    fields: [razao, cnpj, produto],
+    label: "Assuntos Regulatórios",
+    description:
+      "Solicitação de documentos como alvarás, licença sanitária, FDS, instrução de uso, especificação técnica, etc.",
+    fields: [razao, cnpj, produtoOpcional],
     files: [documentos],
     describe: { key: "observacoes", label: "Observações", type: "textarea", required: false },
   },
   {
     id: "comercial",
     label: "Interesse comercial",
-    description: "Informações comerciais, compras, parcerias.",
+    description:
+      "Informações comerciais, compras, parcerias, onde encontrar nossos produtos, etc.",
     fields: [razao, cnpj, endereco, telefone],
     files: [],
     describe: { key: "mensagem", label: "Mensagem", type: "textarea", required: true },
   },
   {
     id: "financeiro",
-    label: "Assuntos financeiros",
-    description: "Solicitações financeiras, boletos, notas fiscais.",
+    label: "Financeiro",
+    description: "Boletos, NF, etc.",
     fields: [razao, cnpj, endereco, nf, { key: "resumo", label: "Resumo", type: "text", required: true }],
     files: [],
     describe: descrever,
@@ -123,7 +115,7 @@ export const TOPICS: Topic[] = [
   {
     id: "outros",
     label: "Outros",
-    description: "Elogios e críticas, RH, eventos.",
+    description: "Elogios, críticas, RH, eventos, etc.",
     fields: [razao, cnpj, endereco, telefone, { key: "resumo", label: "Resumo", type: "text", required: true }],
     files: [],
     describe: descrever,

@@ -59,7 +59,9 @@ export default function LoginPage() {
       return;
     }
     const supabase = createClient();
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/atualizar-senha`,
+    });
     if (error) {
       toast.error("Não foi possível enviar o link.");
     } else {
@@ -71,7 +73,7 @@ export default function LoginPage() {
     <div className="grid min-h-svh lg:grid-cols-2">
       {/* Painel claro com personagens */}
       <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-b from-secondary to-muted p-10 lg:flex">
-        <BrandLogo />
+        <BrandLogo className="w-[200px]" />
 
         <div className="flex flex-1 items-center justify-center">
           <LoginCharacters
@@ -91,7 +93,7 @@ export default function LoginPage() {
       <div className="dark flex items-center justify-center bg-background p-6 text-foreground sm:p-10">
         <div className="w-full max-w-sm">
           <div className="mb-8 flex justify-center lg:hidden">
-            <BrandLogo onDark />
+            <BrandLogo onDark className="w-[200px]" />
           </div>
 
           <div className="mb-8 grid gap-1.5 text-center">

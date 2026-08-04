@@ -94,14 +94,15 @@ export async function getTicketMessages(
   if (error) throw error;
   if (!rows || rows.length === 0) return [];
 
-  const authorIds = [...new Set(rows.map((r) => r.author_id))];
-  const { data: authors } = await supabase
-    .from("profiles")
-    .select("*")
-    .in("id", authorIds);
+  // RPC (SECURITY DEFINER) em vez de SELECT direto em `profiles`: o cliente
+  // não tem RLS para ler o perfil do atendente, só o nome de exibição dos
+  // autores das mensagens do próprio ticket.
+  const { data: authors } = await supabase.rpc("ticket_message_authors", {
+    p_ticket_id: ticketId,
+  });
 
   const nameById = new Map<string, string>(
-    (authors ?? []).map((a) => [a.id, mapUser(a as never).fullName]),
+    (authors ?? []).map((a) => [a.id, a.full_name]),
   );
 
   return rows.map((r) => mapMessage(r, nameById.get(r.author_id) ?? "Usuário"));

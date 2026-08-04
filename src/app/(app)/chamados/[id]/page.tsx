@@ -25,6 +25,7 @@ import { StatusBadge } from "@/components/tickets/status-badge";
 import { PriorityBadge } from "@/components/tickets/priority-badge";
 import {
   AssigneeSelect,
+  CategorySelect,
   PrioritySelect,
   StatusSelect,
 } from "@/components/tickets/ticket-controls";
@@ -234,7 +235,20 @@ export default async function ChamadoDetailPage({
                 </p>
               )}
               <Separator />
-              <MessageComposer ticketId={ticket.id} />
+              {isStaff || ticket.status !== "closed" ? (
+                <MessageComposer
+                  ticketId={ticket.id}
+                  placeholder={
+                    isStaff ? undefined : "Escreva sua mensagem para a equipe..."
+                  }
+                />
+              ) : (
+                <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Lock className="size-4" aria-hidden />
+                  Este ticket foi fechado pela equipe. Caso precise de ajuda,
+                  abra um novo ticket.
+                </p>
+              )}
             </TabsContent>
 
             {showInternal ? (
@@ -277,21 +291,18 @@ export default async function ChamadoDetailPage({
                     ticketId={ticket.id}
                     value={ticket.assigneeId}
                     agents={agents}
+                    currentUserId={user.id}
                   />
+                </Detail>
+                <Detail label="Categoria">
+                  <CategorySelect ticketId={ticket.id} value={ticket.category} />
                 </Detail>
                 <Separator />
               </>
             ) : null}
 
             <Detail label="Solicitante">
-              <div className="grid">
-                <span className="font-medium">{ticket.requester.name}</span>
-                {ticket.requester.company ? (
-                  <span className="text-xs text-muted-foreground">
-                    {ticket.requester.company}
-                  </span>
-                ) : null}
-              </div>
+              <span className="font-medium">{ticket.requester.name}</span>
             </Detail>
             <Detail label="Setor responsável">{ticket.sector.name}</Detail>
             {!isStaff ? (

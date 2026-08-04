@@ -1,13 +1,25 @@
-import type { Database } from "@/types/database";
+import type { Database, TicketStatus as DbTicketStatus } from "@/types/database";
 import type {
   Client,
   Sector,
   Ticket,
   TicketMessage,
+  TicketStatus,
   User,
 } from "@/types/domain";
 
 type Tables = Database["public"]["Tables"];
+
+/**
+ * O enum do Postgres ainda contém 'open'/'resolved' (remover valor de enum
+ * exige recriar o tipo). A migração 0011 converte as linhas existentes, mas
+ * normalizamos aqui para o domínio caso alguma sobre.
+ */
+function normalizeStatus(status: DbTicketStatus): TicketStatus {
+  if (status === "open") return "in_progress";
+  if (status === "resolved") return "closed";
+  return status;
+}
 
 export function mapSector(row: Tables["sectors"]["Row"]): Sector {
   return {
@@ -37,7 +49,6 @@ export function mapClient(row: Tables["clients"]["Row"]): Client {
     name: row.name,
     email: row.email,
     phone: row.phone,
-    company: row.company,
     authUserId: row.auth_user_id,
     createdAt: row.created_at,
   };
@@ -52,8 +63,9 @@ export function mapTicket(row: Tables["tickets"]["Row"]): Ticket {
     requesterId: row.requester_id,
     sectorId: row.sector_id,
     assigneeId: row.assignee_id,
-    status: row.status,
+    status: normalizeStatus(row.status),
     priority: row.priority,
+    category: row.category,
     topic: row.topic,
     details: { fields: row.details?.fields ?? [] },
     createdAt: row.created_at,

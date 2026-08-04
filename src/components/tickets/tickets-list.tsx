@@ -17,12 +17,16 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ExportTicketsDialog } from "@/components/tickets/export-tickets-dialog";
 import {
   TicketsTable,
   type TicketSort,
   type TicketSortKey,
 } from "@/components/tickets/tickets-table";
 import {
+  TICKET_CATEGORIES,
+  TICKET_CATEGORY_LABELS,
   TICKET_PRIORITY,
   TICKET_PRIORITY_ORDER,
   TICKET_STATUS,
@@ -65,15 +69,24 @@ export function TicketsList({
   tickets,
   sectors,
   initialQuery = "",
+  initialStatus = ALL,
+  canExport = false,
 }: {
   tickets: TicketWithRelations[];
   sectors: Sector[];
   initialQuery?: string;
+  /** Status pré-selecionado ao abrir a lista (ex.: staff entra em "Em atendimento"). */
+  initialStatus?: string;
+  canExport?: boolean;
 }) {
   const [query, setQuery] = useState(initialQuery);
-  const [status, setStatus] = useState<string>(ALL);
+  const [status, setStatus] = useState<string>(initialStatus);
   const [priority, setPriority] = useState<string>(ALL);
   const [sector, setSector] = useState<string>(ALL);
+  const [category, setCategory] = useState<string>(ALL);
+  // Período de abertura (yyyy-mm-dd), como na exportação XLS.
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [sort, setSort] = useState<TicketSort>({ key: "updatedAt", dir: "desc" });
   const [page, setPage] = useState(1);
 
@@ -83,14 +96,18 @@ export function TicketsList({
       if (status !== ALL && t.status !== status) return false;
       if (priority !== ALL && t.priority !== priority) return false;
       if (sector !== ALL && t.sectorId !== sector) return false;
+      if (category !== ALL && t.category !== category) return false;
+      const day = t.createdAt.slice(0, 10); // yyyy-mm-dd
+      if (fromDate && day < fromDate) return false;
+      if (toDate && day > toDate) return false;
       if (q) {
         const haystack =
-          `${t.code} ${t.title} ${t.requester.name} ${t.requester.company ?? ""}`.toLowerCase();
+          `${t.code} ${t.title} ${t.requester.name}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
     });
-  }, [tickets, query, status, priority, sector]);
+  }, [tickets, query, status, priority, sector, category, fromDate, toDate]);
 
   const sorted = useMemo(() => {
     const mult = sort.dir === "asc" ? 1 : -1;
@@ -105,7 +122,13 @@ export function TicketsList({
   );
 
   const hasFilters =
-    query !== "" || status !== ALL || priority !== ALL || sector !== ALL;
+    query !== "" ||
+    status !== ALL ||
+    priority !== ALL ||
+    sector !== ALL ||
+    category !== ALL ||
+    fromDate !== "" ||
+    toDate !== "";
 
   // Qualquer mudança de filtro/busca/ordenação volta para a 1ª página.
   function setQueryReset(v: string) {
@@ -124,12 +147,27 @@ export function TicketsList({
     setSector(v);
     setPage(1);
   }
+  function setCategoryReset(v: string) {
+    setCategory(v);
+    setPage(1);
+  }
+  function setFromDateReset(v: string) {
+    setFromDate(v);
+    setPage(1);
+  }
+  function setToDateReset(v: string) {
+    setToDate(v);
+    setPage(1);
+  }
 
   function clearFilters() {
     setQuery("");
     setStatus(ALL);
     setPriority(ALL);
     setSector(ALL);
+    setCategory(ALL);
+    setFromDate("");
+    setToDate("");
     setPage(1);
   }
 
@@ -192,27 +230,77 @@ export function TicketsList({
             </SelectContent>
           </Select>
 
-          <Select value={sector} onValueChange={setSectorReset}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Setor" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value={ALL}>Todos os setores</SelectItem>
-                {sectors.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    {s.name}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          {canExport ? (
+            <Select value={category} onValueChange={setCategoryReset}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value={ALL}>Toda categoria</SelectItem>
+                  {TICKET_CATEGORIES.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {TICKET_CATEGORY_LABELS[c]}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          ) : null}
+
+          {sectors.length > 1 ? (
+            <Select value={sector} onValueChange={setSectorReset}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Setor" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value={ALL}>Todos os setores</SelectItem>
+                  {sectors.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          ) : null}
+
+          {canExport ? (
+            <div className="flex items-center gap-1.5">
+              <Input
+                type="date"
+                value={fromDate}
+                max={toDate || undefined}
+                onChange={(e) => setFromDateReset(e.target.value)}
+                className="w-[150px]"
+                aria-label="Aberto a partir de"
+                title="Aberto a partir de"
+              />
+              <span className="text-xs text-muted-foreground">até</span>
+              <Input
+                type="date"
+                value={toDate}
+                min={fromDate || undefined}
+                onChange={(e) => setToDateReset(e.target.value)}
+                className="w-[150px]"
+                aria-label="Aberto até"
+                title="Aberto até"
+              />
+            </div>
+          ) : null}
 
           {hasFilters ? (
             <Button variant="ghost" size="sm" onClick={clearFilters}>
               <X data-icon="inline-start" />
               Limpar
             </Button>
+          ) : null}
+
+          {canExport ? (
+            <div className="lg:ml-auto">
+              <ExportTicketsDialog tickets={tickets} />
+            </div>
           ) : null}
         </div>
       </div>
@@ -226,6 +314,7 @@ export function TicketsList({
         tickets={pageItems}
         sort={sort}
         onSort={handleSort}
+        showCategory={canExport}
         emptyHint={
           hasFilters
             ? "Nenhum ticket corresponde aos filtros. Ajuste a busca."

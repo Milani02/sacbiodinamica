@@ -48,3 +48,11 @@ next-env.d.ts
 
 # logo original na raiz (copia versionada fica em public/)
 /logo biodinamica.jpg
+
+# documentos internos de validacao (nao fazem parte do app)
+/documento para atualizar/
+/documento validação/
+
+# python scratch (docs/_tools scripts)
+__pycache__/
+*.pyc

@@ -71,14 +71,12 @@ export function ClientsManager({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [company, setCompany] = useState("");
 
   function openCreate() {
     setEditing(null);
     setName("");
     setEmail("");
     setPhone("");
-    setCompany("");
     setFormOpen(true);
   }
 
@@ -87,13 +85,12 @@ export function ClientsManager({
     setName(client.name);
     setEmail(client.email);
     setPhone(client.phone ?? "");
-    setCompany(client.company ?? "");
     setFormOpen(true);
   }
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    const payload = { name, email, phone, company };
+    const payload = { name, email, phone };
     start(async () => {
       const res = editing
         ? await updateClient(editing.id, payload)
@@ -138,7 +135,6 @@ export function ClientsManager({
           <TableHeader>
             <TableRow className="hover:bg-transparent">
               <TableHead>Cliente</TableHead>
-              <TableHead className="hidden md:table-cell">Empresa</TableHead>
               <TableHead className="hidden lg:table-cell">Telefone</TableHead>
               <TableHead className="text-right">Tickets</TableHead>
               {canManage ? <TableHead className="w-12" /> : null}
@@ -161,9 +157,6 @@ export function ClientsManager({
                       </span>
                     </div>
                   </div>
-                </TableCell>
-                <TableCell className="hidden text-sm text-muted-foreground md:table-cell">
-                  {client.company ?? "—"}
                 </TableCell>
                 <TableCell className="hidden text-sm text-muted-foreground lg:table-cell">
                   {client.phone ?? "—"}
@@ -235,26 +228,15 @@ export function ClientsManager({
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </Field>
-              <div className="grid gap-6 sm:grid-cols-2">
-                <Field>
-                  <FieldLabel htmlFor="client-phone">Telefone</FieldLabel>
-                  <Input
-                    id="client-phone"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Opcional"
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="client-company">Empresa</FieldLabel>
-                  <Input
-                    id="client-company"
-                    value={company}
-                    onChange={(e) => setCompany(e.target.value)}
-                    placeholder="Opcional"
-                  />
-                </Field>
-              </div>
+              <Field>
+                <FieldLabel htmlFor="client-phone">Telefone</FieldLabel>
+                <Input
+                  id="client-phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Opcional"
+                />
+              </Field>
             </FieldGroup>
             <DialogFooter>
               <Button

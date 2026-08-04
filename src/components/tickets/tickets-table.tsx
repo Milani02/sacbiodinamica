@@ -19,6 +19,7 @@ import {
 import { ChevronDown, ChevronUp, ChevronsUpDown, Inbox } from "lucide-react";
 import { StatusBadge } from "@/components/tickets/status-badge";
 import { PriorityBadge } from "@/components/tickets/priority-badge";
+import { TICKET_CATEGORY_LABELS } from "@/features/tickets/constants";
 import { formatRelative, initials } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { TicketPriority, TicketWithRelations } from "@/types/domain";
@@ -90,11 +91,14 @@ export function TicketsTable({
   emptyHint,
   sort,
   onSort,
+  showCategory = false,
 }: {
   tickets: TicketWithRelations[];
   emptyHint?: string;
   sort?: TicketSort;
   onSort?: (key: TicketSortKey) => void;
+  /** Mostra a coluna Categoria (só para staff; cliente nunca recebe true). */
+  showCategory?: boolean;
 }) {
   if (tickets.length === 0) {
     return (
@@ -124,6 +128,9 @@ export function TicketsTable({
             <SortHead label="Responsável" className="hidden lg:table-cell" />
             <SortHead label="Status" column="status" sort={sort} onSort={onSort} />
             <SortHead label="Prioridade" column="priority" sort={sort} onSort={onSort} className="hidden sm:table-cell" />
+            {showCategory ? (
+              <SortHead label="Categoria" className="hidden lg:table-cell" />
+            ) : null}
             <SortHead label="Atualizado" column="updatedAt" sort={sort} onSort={onSort} className="hidden xl:table-cell" />
           </TableRow>
         </TableHeader>
@@ -151,9 +158,6 @@ export function TicketsTable({
                   </span>
                   <span className="block truncate text-xs text-muted-foreground">
                     {ticket.requester.name}
-                    {ticket.requester.company
-                      ? ` · ${ticket.requester.company}`
-                      : ""}
                   </span>
                 </Link>
               </TableCell>
@@ -182,6 +186,23 @@ export function TicketsTable({
               <TableCell className="hidden sm:table-cell">
                 <PriorityBadge priority={ticket.priority} />
               </TableCell>
+              {showCategory ? (
+                <TableCell className="hidden lg:table-cell">
+                  {ticket.category ? (
+                    <span
+                      className="inline-flex rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs font-medium"
+                      title={
+                        TICKET_CATEGORY_LABELS[ticket.category] ??
+                        ticket.category
+                      }
+                    >
+                      {ticket.category}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">—</span>
+                  )}
+                </TableCell>
+              ) : null}
               <TableCell className="hidden text-sm text-muted-foreground tabular-nums xl:table-cell">
                 {formatRelative(ticket.updatedAt)}
               </TableCell>

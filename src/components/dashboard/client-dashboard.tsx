@@ -25,9 +25,7 @@ export function ClientDashboard({
   const firstName = user.fullName.split(" ")[0] || "cliente";
   const open = tickets.filter((t) => ACTIVE_STATUSES.includes(t.status)).length;
   const waiting = tickets.filter((t) => t.status === "waiting_client").length;
-  const solved = tickets.filter((t) =>
-    ["resolved", "closed"].includes(t.status),
-  ).length;
+  const solved = tickets.filter((t) => t.status === "closed").length;
 
   return (
     <>

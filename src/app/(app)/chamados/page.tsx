@@ -7,6 +7,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { TicketsList } from "@/components/tickets/tickets-list";
 import { listTickets } from "@/features/tickets/queries";
 import { listSectors } from "@/features/sectors/queries";
+import { getCurrentUser } from "@/features/auth/current-user";
+import { can } from "@/features/auth/roles";
 
 export const metadata: Metadata = { title: "Tickets" };
 
@@ -15,11 +17,13 @@ export default async function ChamadosPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
-  const [{ q }, tickets, sectors] = await Promise.all([
+  const [{ q }, tickets, sectors, user] = await Promise.all([
     searchParams,
     listTickets(),
     listSectors(),
+    getCurrentUser(),
   ]);
+  const isStaff = !!user && can.respondTickets(user.role);
   return (
     <>
       <PageHeader
@@ -39,6 +43,9 @@ export default async function ChamadosPage({
         tickets={tickets}
         sectors={sectors}
         initialQuery={q ?? ""}
+        // Atendente entra com a fila "Em atendimento"; cliente vê tudo.
+        initialStatus={isStaff ? "in_progress" : undefined}
+        canExport={isStaff}
       />
     </>
   );

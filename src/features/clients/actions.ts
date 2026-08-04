@@ -26,7 +26,6 @@ export async function createClient(input: {
   name: string;
   email: string;
   phone: string;
-  company: string;
 }): Promise<ActionResult> {
   const err = validate(input);
   if (err) return { ok: false, error: err };
@@ -36,7 +35,6 @@ export async function createClient(input: {
     name: input.name.trim(),
     email: input.email.trim(),
     phone: input.phone.trim() || null,
-    company: input.company.trim() || null,
   });
   if (error) return { ok: false, error: "Não foi possível criar o cliente." };
 
@@ -46,7 +44,7 @@ export async function createClient(input: {
 
 export async function updateClient(
   id: string,
-  input: { name: string; email: string; phone: string; company: string },
+  input: { name: string; email: string; phone: string },
 ): Promise<ActionResult> {
   const err = validate(input);
   if (err) return { ok: false, error: err };
@@ -58,7 +56,6 @@ export async function updateClient(
       name: input.name.trim(),
       email: input.email.trim(),
       phone: input.phone.trim() || null,
-      company: input.company.trim() || null,
     })
     .eq("id", id);
   if (error) return { ok: false, error: "Não foi possível salvar o cliente." };

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, MailCheck } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +28,6 @@ export default function RegistroPage() {
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [confirmSent, setConfirmSent] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -61,8 +60,10 @@ export default function RegistroPage() {
       return;
     }
 
-    setConfirmSent(true);
-    setLoading(false);
+    // Sem confirmação de e-mail, o cadastro já cria sessão. Se por algum
+    // motivo não vier (ex.: confirmação reativada no Supabase), seguimos
+    // para o login.
+    window.location.assign("/login");
   }
 
   return (
@@ -92,118 +93,100 @@ export default function RegistroPage() {
             <BrandLogo onDark />
           </div>
 
-          {confirmSent ? (
-            <div className="grid gap-4">
-              <Alert>
-                <MailCheck />
-                <AlertTitle>Confirme seu e-mail</AlertTitle>
-                <AlertDescription>
-                  Enviamos um link de confirmação para <strong>{email}</strong>.
-                  Após confirmar, faça login para acessar a central.
-                </AlertDescription>
-              </Alert>
-              <Button asChild variant="outline">
-                <Link href="/login">Ir para o login</Link>
+          <div className="mb-8 grid gap-1.5 text-center">
+            <h1 className="text-3xl font-bold tracking-tight">Criar conta</h1>
+            <p className="text-sm text-muted-foreground">
+              Registre-se como cliente para abrir e acompanhar tickets.
+            </p>
+          </div>
+
+          {error ? (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTitle>Não foi possível criar a conta</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
+
+          <form onSubmit={handleSubmit}>
+            <div className="flex flex-col gap-4">
+              <Field>
+                <FieldLabel htmlFor="name">Nome completo</FieldLabel>
+                <Input
+                  id="name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  onFocus={() => {
+                    setEmailFocused(false);
+                    setPasswordFocused(false);
+                  }}
+                  autoComplete="name"
+                  required
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="email">E-mail</FieldLabel>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onFocus={() => {
+                    setEmailFocused(true);
+                    setPasswordFocused(false);
+                  }}
+                  onBlur={() => setEmailFocused(false)}
+                  placeholder="voce@empresa.com"
+                  autoComplete="email"
+                  required
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="password">Senha</FieldLabel>
+                <InputGroup>
+                  <InputGroupInput
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onFocus={() => setPasswordFocused(true)}
+                    onBlur={() => setPasswordFocused(false)}
+                    placeholder="Mínimo 8 caracteres"
+                    autoComplete="new-password"
+                    required
+                  />
+                  <InputGroupAddon align="inline-end">
+                    <InputGroupButton
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setShowPassword((s) => !s)}
+                      aria-label={
+                        showPassword ? "Ocultar senha" : "Mostrar senha"
+                      }
+                    >
+                      {showPassword ? <EyeOff /> : <Eye />}
+                    </InputGroupButton>
+                  </InputGroupAddon>
+                </InputGroup>
+              </Field>
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? <Spinner data-icon="inline-start" /> : null}
+                Criar conta
               </Button>
             </div>
-          ) : (
-            <>
-              <div className="mb-8 grid gap-1.5 text-center">
-                <h1 className="text-3xl font-bold tracking-tight">Criar conta</h1>
-                <p className="text-sm text-muted-foreground">
-                  Registre-se como cliente para abrir e acompanhar tickets.
-                </p>
-              </div>
+          </form>
 
-              {error ? (
-                <Alert variant="destructive" className="mb-4">
-                  <AlertTitle>Não foi possível criar a conta</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              ) : null}
-
-              <form onSubmit={handleSubmit}>
-                <div className="flex flex-col gap-4">
-                  <Field>
-                    <FieldLabel htmlFor="name">Nome completo</FieldLabel>
-                    <Input
-                      id="name"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      onFocus={() => {
-                        setEmailFocused(false);
-                        setPasswordFocused(false);
-                      }}
-                      autoComplete="name"
-                      required
-                    />
-                  </Field>
-
-                  <Field>
-                    <FieldLabel htmlFor="email">E-mail</FieldLabel>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      onFocus={() => {
-                        setEmailFocused(true);
-                        setPasswordFocused(false);
-                      }}
-                      onBlur={() => setEmailFocused(false)}
-                      placeholder="voce@empresa.com"
-                      autoComplete="email"
-                      required
-                    />
-                  </Field>
-
-                  <Field>
-                    <FieldLabel htmlFor="password">Senha</FieldLabel>
-                    <InputGroup>
-                      <InputGroupInput
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        onFocus={() => setPasswordFocused(true)}
-                        onBlur={() => setPasswordFocused(false)}
-                        placeholder="Mínimo 8 caracteres"
-                        autoComplete="new-password"
-                        required
-                      />
-                      <InputGroupAddon align="inline-end">
-                        <InputGroupButton
-                          type="button"
-                          variant="ghost"
-                          onClick={() => setShowPassword((s) => !s)}
-                          aria-label={
-                            showPassword ? "Ocultar senha" : "Mostrar senha"
-                          }
-                        >
-                          {showPassword ? <EyeOff /> : <Eye />}
-                        </InputGroupButton>
-                      </InputGroupAddon>
-                    </InputGroup>
-                  </Field>
-
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? <Spinner data-icon="inline-start" /> : null}
-                    Criar conta
-                  </Button>
-                </div>
-              </form>
-
-              <p className="mt-8 text-center text-sm text-muted-foreground">
-                Já tem conta?{" "}
-                <Link
-                  href="/login"
-                  className="font-medium text-primary underline-offset-4 hover:underline"
-                >
-                  Entrar
-                </Link>
-              </p>
-            </>
-          )}
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            Já tem conta?{" "}
+            <Link
+              href="/login"
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
+              Entrar
+            </Link>
+          </p>
         </div>
       </div>
     </div>

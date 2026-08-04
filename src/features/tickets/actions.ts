@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/features/auth/current-user";
 import { getTopic } from "@/features/tickets/topics";
+import { TICKET_CATEGORIES } from "@/features/tickets/constants";
 import type { TicketPriority, TicketStatus } from "@/types/domain";
 
 export interface ActionResult {
@@ -15,10 +16,8 @@ export interface ActionResult {
 
 const STATUSES: TicketStatus[] = [
   "new",
-  "open",
   "in_progress",
   "waiting_client",
-  "resolved",
   "closed",
 ];
 const PRIORITIES: TicketPriority[] = ["low", "medium", "high", "urgent"];
@@ -75,7 +74,10 @@ export async function createTicket(input: {
     .select("id")
     .single();
 
-  if (error) return { ok: false, error: "Não foi possível abrir o ticket." };
+  if (error) {
+    console.error("createTicket insert failed:", error);
+    return { ok: false, error: "Não foi possível abrir o ticket." };
+  }
 
   revalidateTicket(data.id);
   return { ok: true, id: data.id };
@@ -143,7 +145,10 @@ export async function createTicketFromTopic(input: {
     .select("id")
     .single();
 
-  if (error) return { ok: false, error: "Não foi possível abrir o ticket." };
+  if (error) {
+    console.error("createTicketFromTopic insert failed:", error);
+    return { ok: false, error: "Não foi possível abrir o ticket." };
+  }
 
   revalidateTicket(data.id);
   return { ok: true, id: data.id };
@@ -185,6 +190,28 @@ export async function updateTicketPriority(
   return { ok: true };
 }
 
+export async function updateTicketCategory(
+  id: string,
+  category: string | null,
+): Promise<ActionResult> {
+  // null/"" limpa a categoria; caso contrário precisa ser uma das R1–R19.
+  const value = category && category.trim() ? category.trim() : null;
+  if (value && !TICKET_CATEGORIES.includes(value)) {
+    return { ok: false, error: "Categoria inválida." };
+  }
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("tickets")
+    .update({ category: value })
+    .eq("id", id);
+  if (error) {
+    console.error("updateTicketCategory failed:", error);
+    return { ok: false, error: "Não foi possível atualizar a categoria." };
+  }
+  revalidateTicket(id);
+  return { ok: true };
+}
+
 export async function assignTicket(
   id: string,
   assigneeId: string | null,
@@ -209,17 +236,32 @@ export async function addMessage(
   const text = body.trim();
   if (!text) return { ok: false, error: "Escreva uma mensagem." };
 
+  const me = await getCurrentUser();
+  if (!me) return { ok: false, error: "Sessão expirada. Entre novamente." };
+
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Sessão expirada. Entre novamente." };
+
+  // Ticket fechado: só a equipe pode comentar (e reabrir manualmente).
+  // O RLS também bloqueia; aqui devolvemos uma mensagem amigável.
+  if (me.role === "client") {
+    const { data: ticket } = await supabase
+      .from("tickets")
+      .select("status")
+      .eq("id", ticketId)
+      .single();
+    if (ticket?.status === "closed") {
+      return {
+        ok: false,
+        error: "Este ticket foi fechado pela equipe e não aceita novas mensagens.",
+      };
+    }
+  }
 
   const { data, error } = await supabase
     .from("ticket_messages")
     .insert({
       ticket_id: ticketId,
-      author_id: user.id,
+      author_id: me.id,
       body: text,
       is_internal: isInternal,
     })

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut, Search, UserRound } from "lucide-react";
 
@@ -88,9 +89,11 @@ export function AppTopbar({ user }: { user: User }) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem disabled>
-                <UserRound />
-                Meu perfil
+              <DropdownMenuItem asChild>
+                <Link href="/perfil">
+                  <UserRound />
+                  Meu perfil
+                </Link>
               </DropdownMenuItem>
               <form action={signOut}>
                 <DropdownMenuItem asChild variant="destructive">

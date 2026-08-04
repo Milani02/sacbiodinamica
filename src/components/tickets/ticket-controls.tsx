@@ -4,6 +4,9 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+import { UserCheck } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -13,6 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  TICKET_CATEGORIES,
+  TICKET_CATEGORY_LABELS,
   TICKET_PRIORITY,
   TICKET_PRIORITY_ORDER,
   TICKET_STATUS,
@@ -20,6 +25,7 @@ import {
 } from "@/features/tickets/constants";
 import {
   assignTicket,
+  updateTicketCategory,
   updateTicketPriority,
   updateTicketStatus,
   type ActionResult,
@@ -110,29 +116,83 @@ export function AssigneeSelect({
   ticketId,
   value,
   agents,
+  currentUserId,
 }: {
   ticketId: string;
   value: string | null;
   agents: User[];
+  /** Id do atendente logado, para o atalho "Atribuir a mim". */
+  currentUserId?: string;
+}) {
+  const { pending, run } = useAction();
+  const assignedToMe = !!currentUserId && value === currentUserId;
+  return (
+    <div className="grid gap-2">
+      <Select
+        value={value ?? UNASSIGNED}
+        disabled={pending}
+        onValueChange={(v) =>
+          run(() => assignTicket(ticketId, v === UNASSIGNED ? null : v))
+        }
+      >
+        <SelectTrigger className="w-full">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem value={UNASSIGNED}>Não atribuído</SelectItem>
+            {agents.map((a) => (
+              <SelectItem key={a.id} value={a.id}>
+                {a.fullName}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+
+      {currentUserId && !assignedToMe ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={pending}
+          onClick={() => run(() => assignTicket(ticketId, currentUserId))}
+        >
+          <UserCheck data-icon="inline-start" />
+          Atribuir a mim
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
+const NO_CATEGORY = "none";
+
+export function CategorySelect({
+  ticketId,
+  value,
+}: {
+  ticketId: string;
+  value: string | null;
 }) {
   const { pending, run } = useAction();
   return (
     <Select
-      value={value ?? UNASSIGNED}
+      value={value ?? NO_CATEGORY}
       disabled={pending}
       onValueChange={(v) =>
-        run(() => assignTicket(ticketId, v === UNASSIGNED ? null : v))
+        run(() => updateTicketCategory(ticketId, v === NO_CATEGORY ? null : v))
       }
     >
       <SelectTrigger className="w-full">
-        <SelectValue />
+        <SelectValue placeholder="Selecione a categoria" />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          <SelectItem value={UNASSIGNED}>Não atribuído</SelectItem>
-          {agents.map((a) => (
-            <SelectItem key={a.id} value={a.id}>
-              {a.fullName}
+          <SelectItem value={NO_CATEGORY}>Sem categoria</SelectItem>
+          {TICKET_CATEGORIES.map((c) => (
+            <SelectItem key={c} value={c}>
+              {TICKET_CATEGORY_LABELS[c]}
             </SelectItem>
           ))}
         </SelectGroup>

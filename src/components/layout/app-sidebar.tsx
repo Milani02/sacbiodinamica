@@ -43,7 +43,7 @@ export function AppSidebar({ user }: { user: User }) {
             width={300}
             height={120}
             priority
-            className="h-12 w-auto object-contain group-data-[collapsible=icon]:hidden"
+            className="h-20 w-auto object-contain group-data-[collapsible=icon]:hidden"
           />
         </div>
       </SidebarHeader>

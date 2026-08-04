@@ -18,9 +18,11 @@ import { uploadAttachment } from "@/features/tickets/upload";
 export function MessageComposer({
   ticketId,
   isInternal = false,
+  placeholder,
 }: {
   ticketId: string;
   isInternal?: boolean;
+  placeholder?: string;
 }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -64,9 +66,10 @@ export function MessageComposer({
       <InputGroup>
         <InputGroupTextarea
           placeholder={
-            isInternal
+            placeholder ??
+            (isInternal
               ? "Escreva uma nota interna (visível só para a equipe)..."
-              : "Escreva uma resposta ao solicitante..."
+              : "Escreva uma resposta ao solicitante...")
           }
           value={body}
           onChange={(e) => setBody(e.target.value)}

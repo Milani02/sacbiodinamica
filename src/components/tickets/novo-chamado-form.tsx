@@ -46,7 +46,9 @@ export function NovoChamadoForm({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [requester, setRequester] = useState("");
-  const [sector, setSector] = useState("");
+  // Com apenas um setor (SAC Geral), já vem selecionado e o campo é ocultado.
+  const singleSector = sectors.length === 1;
+  const [sector, setSector] = useState(singleSector ? sectors[0].id : "");
   const [priority, setPriority] = useState<TicketPriority>("medium");
   const [submitted, setSubmitted] = useState(false);
 
@@ -115,7 +117,9 @@ export function NovoChamadoForm({
 
             <div
               className={
-                isClient ? "grid gap-6" : "grid gap-6 sm:grid-cols-2"
+                !isClient && !singleSector
+                  ? "grid gap-6 sm:grid-cols-2"
+                  : "grid gap-6"
               }
             >
               {!isClient ? (
@@ -132,7 +136,6 @@ export function NovoChamadoForm({
                         {clients.map((c) => (
                           <SelectItem key={c.id} value={c.id}>
                             {c.name}
-                            {c.company ? ` · ${c.company}` : ""}
                           </SelectItem>
                         ))}
                       </SelectGroup>
@@ -144,26 +147,28 @@ export function NovoChamadoForm({
                 </Field>
               ) : null}
 
-              <Field data-invalid={submitted && !!errors.sector}>
-                <FieldLabel>Setor responsável</FieldLabel>
-                <Select value={sector} onValueChange={setSector}>
-                  <SelectTrigger aria-invalid={submitted && !!errors.sector}>
-                    <SelectValue placeholder="Selecione o setor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {sectors.map((s) => (
-                        <SelectItem key={s.id} value={s.id}>
-                          {s.name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                {submitted && errors.sector ? (
-                  <FieldError>{errors.sector}</FieldError>
-                ) : null}
-              </Field>
+              {!singleSector ? (
+                <Field data-invalid={submitted && !!errors.sector}>
+                  <FieldLabel>Setor responsável</FieldLabel>
+                  <Select value={sector} onValueChange={setSector}>
+                    <SelectTrigger aria-invalid={submitted && !!errors.sector}>
+                      <SelectValue placeholder="Selecione o setor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {sectors.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>
+                            {s.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  {submitted && errors.sector ? (
+                    <FieldError>{errors.sector}</FieldError>
+                  ) : null}
+                </Field>
+              ) : null}
             </div>
 
             <Field>

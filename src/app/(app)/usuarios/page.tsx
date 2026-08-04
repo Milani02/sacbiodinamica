@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { UsersManager } from "@/components/users/users-manager";
@@ -10,13 +11,13 @@ import { can } from "@/features/auth/roles";
 export const metadata: Metadata = { title: "Usuários" };
 
 export default async function UsuariosPage() {
-  const [users, sectors, me] = await Promise.all([
-    listUsers(),
-    listSectors(),
-    getCurrentUser(),
-  ]);
+  // Autorização por papel: só admin acessa a gestão de usuários.
+  const me = await getCurrentUser();
+  if (!me || !can.manageUsers(me.role)) redirect("/dashboard");
 
-  const canManage = me ? can.manageUsers(me.role) : false;
+  const [users, sectors] = await Promise.all([listUsers(), listSectors()]);
+
+  const canManage = can.manageUsers(me.role);
 
   return (
     <>

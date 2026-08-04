@@ -10,10 +10,8 @@ export type UserRole = "admin" | "agent" | "client";
 
 export type TicketStatus =
   | "new"
-  | "open"
   | "in_progress"
   | "waiting_client"
-  | "resolved"
   | "closed";
 
 export type TicketPriority = "low" | "medium" | "high" | "urgent";
@@ -42,7 +40,6 @@ export interface Client {
   name: string;
   email: string;
   phone: string | null;
-  company: string | null;
   /** Linked auth account (when the requester logs in as a client). */
   authUserId: string | null;
   createdAt: string;
@@ -85,6 +82,8 @@ export interface Ticket {
   assigneeId: string | null;
   status: TicketStatus;
   priority: TicketPriority;
+  /** Categoria interna definida pelo atendente (R1–R19). */
+  category: string | null;
   /** Topic chosen by the client (null for staff-created tickets). */
   topic: string | null;
   /** Structured fields captured by the client's topic form. */

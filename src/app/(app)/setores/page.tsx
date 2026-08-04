@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { SectorsManager } from "@/components/sectors/sectors-manager";
@@ -10,18 +11,18 @@ import { can } from "@/features/auth/roles";
 export const metadata: Metadata = { title: "Setores" };
 
 export default async function SetoresPage() {
-  const [sectors, tickets, user] = await Promise.all([
-    listSectors(),
-    listTickets(),
-    getCurrentUser(),
-  ]);
+  // Autorização por papel: só admin gerencia setores.
+  const user = await getCurrentUser();
+  if (!user || !can.manageSectors(user.role)) redirect("/dashboard");
+
+  const [sectors, tickets] = await Promise.all([listSectors(), listTickets()]);
 
   const counts: Record<string, number> = {};
   for (const t of tickets) {
     counts[t.sectorId] = (counts[t.sectorId] ?? 0) + 1;
   }
 
-  const canManage = user ? can.manageSectors(user.role) : false;
+  const canManage = can.manageSectors(user.role);
 
   return (
     <>

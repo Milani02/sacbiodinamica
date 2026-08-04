@@ -45,9 +45,7 @@ export default async function DashboardPage() {
   const inProgressCount = tickets.filter((t) => t.status === "in_progress").length;
   const waitingCount = tickets.filter((t) => t.status === "waiting_client").length;
   const urgentCount = tickets.filter(
-    (t) =>
-      ["high", "urgent"].includes(t.priority) &&
-      !["resolved", "closed"].includes(t.status),
+    (t) => ["high", "urgent"].includes(t.priority) && t.status !== "closed",
   ).length;
 
   const statusData = TICKET_STATUS_ORDER.map((s) => ({
@@ -66,11 +64,13 @@ export default async function DashboardPage() {
     .sort((a, b) => b.count - a.count)
     .slice(0, 8);
 
-  const myTickets = (
-    isStaff && user
-      ? tickets.filter((t) => t.assigneeId === user.id)
-      : tickets
-  ).filter((t) => ACTIVE_STATUSES.includes(t.status));
+  // "Meus tickets em aberto": atribuídos a mim + os novos ainda sem
+  // responsável, para que todo ticket novo apareça aqui automaticamente.
+  const myTickets = tickets.filter(
+    (t) =>
+      ACTIVE_STATUSES.includes(t.status) &&
+      (!isStaff || !user || t.assigneeId === user.id || t.assigneeId === null),
+  );
 
   const recent = tickets.slice(0, 6);
 
@@ -139,16 +139,17 @@ export default async function DashboardPage() {
           <CardTitle>Meus tickets em aberto</CardTitle>
           <CardDescription>
             {isStaff
-              ? "Tickets atribuídos a você que ainda estão ativos."
+              ? "Seus tickets e os novos ainda sem responsável."
               : "Seus tickets ativos na central."}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <TicketsTable
             tickets={myTickets}
+            showCategory
             emptyHint={
               isStaff
-                ? "Nenhum ticket atribuído a você no momento."
+                ? "Nenhum ticket em aberto no momento."
                 : "Você não tem tickets em aberto."
             }
           />
@@ -161,7 +162,7 @@ export default async function DashboardPage() {
           <CardDescription>Últimas movimentações na central.</CardDescription>
         </CardHeader>
         <CardContent>
-          <TicketsTable tickets={recent} />
+          <TicketsTable tickets={recent} showCategory />
         </CardContent>
       </Card>
     </>
